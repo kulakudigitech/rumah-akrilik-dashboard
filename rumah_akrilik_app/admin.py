@@ -3,6 +3,10 @@
 
 from django.contrib import admin
 from django.utils.html import format_html
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 from .models import (
     Role,
     UserProfile,
@@ -40,18 +44,19 @@ class RoleAdmin(BaseAdmin):
     readonly_fields = ()
 
 @admin.register(UserProfile)
-class UserProfileAdmin(BaseAdmin):
-    list_display = ('user', 'get_role', 'tipe_karyawan', 'phone', 'join_date', 'is_active') # Tambahkan tipe_karyawan & is_active
-    list_filter = ('role', 'join_date', 'tipe_karyawan', 'is_active') # Tambahkan tipe_karyawan & is_active
-    search_fields = ('user__username', 'user__first_name', 'user__last_name', 'phone')
-    raw_id_fields = ('user','role') # Pisahkan raw_id_fields
-    readonly_fields = ()
-
-    @admin.display(description='Role', ordering='role__name') # Tambahkan ordering
-    def get_role(self, obj):
-        return obj.role.name
-    # get_role.short_description = 'Role' # Tidak perlu jika @admin.display digunakan
-    # get_role.admin_order_field = 'role__name' # Tidak perlu jika @admin.display digunakan
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ['user', 'display_roles', 'phone', 'is_active']
+    list_filter = ['is_active', 'roles']  # Gunakan 'roles' sebagai ManyToManyField
+    search_fields = ['user__username', 'user__email', 'phone', 'address']
+    raw_id_fields = ['user']
+    filter_horizontal = ['roles']  # Gunakan filter_horizontal untuk ManyToManyField
+    
+    def display_roles(self, obj):
+        """Display all roles as a comma-separated string"""
+        if obj.roles.exists():
+            return ", ".join([role.name for role in obj.roles.all()])
+        return "-"
+    display_roles.short_description = "Roles"
 
 # Product Management
 @admin.register(ProductCategory)
@@ -303,3 +308,43 @@ admin.site.register(MarketingCampaign)
 admin.site.site_header = "Rumah Akrilik Administration"
 admin.site.site_title = "Rumah Akrilik Admin Portal"
 admin.site.index_title = "Welcome to Rumah Akrilik Admin"
+
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def emergency_login_direct(request):
+    """
+    Endpoint login darurat yang sangat minimal
+    """
+    try:
+        username = request.data.get('username')
+        password = request.data.get('password')
+        
+        print(f"Emergency login attempt: {username}")
+        
+        # Autentikasi langsung tanpa middleware
+        from django.contrib.auth import authenticate
+        user = authenticate(username=username, password=password)
+        
+        if not user:
+            return Response({'error': 'Invalid Credentials'}, status=400)
+        
+        # Buat token
+        from rest_framework_simplejwt.tokens import RefreshToken
+        refresh = RefreshToken.for_user(user)
+        
+        # Response minimal
+        return Response({
+            'token': str(refresh.access_token),
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+            'username': user.username,
+            'is_staff': user.is_staff,
+            'is_superuser': user.is_superuser,
+            'role': 'Admin' if user.is_superuser else 'User'
+        })
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return Response({'error': str(e)}, status=500)

@@ -61,3 +61,1167 @@ WARNING 2025-04-30 11:25:45,723 log 2197139 139798761742336 Forbidden: /api/orde
 WARNING 2025-04-30 11:27:18,548 log 2197140 139798761742336 Forbidden: /api/order/
 WARNING 2025-04-30 12:35:41,627 log 2205839 139938138468352 Bad Request: /api/order/
 WARNING 2025-04-30 12:39:27,312 log 2205836 139938138468352 Unauthorized: /api/order/
+WARNING 2025-04-30 12:52:49,394 log 2205837 139938138468352 Bad Request: /api/order/
+WARNING 2025-04-30 12:58:23,043 log 2205837 139938138468352 Bad Request: /api/order/
+WARNING 2025-04-30 13:05:41,717 log 2205840 139938138468352 Bad Request: /api/order/
+WARNING 2025-04-30 13:13:54,533 log 2205837 139938138468352 Bad Request: /api/order/
+WARNING 2025-04-30 13:45:16,625 log 2205840 139938138468352 Unauthorized: /api/auth/token/verify/
+WARNING 2025-04-30 14:21:47,795 log 2205837 139938138468352 Unauthorized: /api/auth/token/verify/
+WARNING 2025-04-30 14:48:10,093 log 2205838 139938138468352 Bad Request: /api/auth/login/
+WARNING 2025-04-30 14:48:39,509 log 2205839 139938138468352 Bad Request: /api/auth/login/
+WARNING 2025-04-30 14:48:41,051 log 2205836 139938138468352 Bad Request: /api/auth/login/
+WARNING 2025-04-30 14:48:44,335 log 2205840 139938138468352 Bad Request: /api/auth/login/
+WARNING 2025-04-30 14:48:45,297 log 2205838 139938138468352 Bad Request: /api/auth/login/
+WARNING 2025-04-30 14:48:45,328 log 2205837 139938138468352 Bad Request: /api/auth/login/
+WARNING 2025-04-30 14:49:24,352 log 2205840 139938138468352 Bad Request: /api/auth/login/
+WARNING 2025-04-30 14:49:25,183 log 2205837 139938138468352 Bad Request: /api/auth/login/
+WARNING 2025-04-30 14:49:27,302 log 2205839 139938138468352 Bad Request: /api/auth/login/
+WARNING 2025-04-30 14:49:27,595 log 2205836 139938138468352 Bad Request: /api/auth/login/
+WARNING 2025-04-30 14:49:27,706 log 2205838 139938138468352 Bad Request: /api/auth/login/
+WARNING 2025-04-30 14:49:27,885 log 2205837 139938138468352 Bad Request: /api/auth/login/
+WARNING 2025-04-30 14:49:28,046 log 2205840 139938138468352 Bad Request: /api/auth/login/
+WARNING 2025-04-30 14:49:28,204 log 2205838 139938138468352 Bad Request: /api/auth/login/
+WARNING 2025-04-30 14:49:32,827 log 2205837 139938138468352 Bad Request: /api/auth/login/
+WARNING 2025-04-30 14:49:33,134 log 2205836 139938138468352 Bad Request: /api/auth/login/
+WARNING 2025-04-30 14:49:33,182 log 2205838 139938138468352 Bad Request: /api/auth/login/
+WARNING 2025-04-30 14:49:44,119 log 2205840 139938138468352 Bad Request: /api/auth/login/
+WARNING 2025-04-30 14:49:53,287 log 2205837 139938138468352 Bad Request: /api/auth/login/
+WARNING 2025-04-30 14:49:53,687 log 2205840 139938138468352 Bad Request: /api/auth/login/
+WARNING 2025-04-30 14:49:53,969 log 2205838 139938138468352 Bad Request: /api/auth/login/
+WARNING 2025-04-30 14:49:54,283 log 2205840 139938138468352 Bad Request: /api/auth/login/
+WARNING 2025-04-30 14:49:54,294 log 2205837 139938138468352 Bad Request: /api/auth/login/
+WARNING 2025-04-30 14:49:54,869 log 2205840 139938138468352 Bad Request: /api/auth/login/
+WARNING 2025-04-30 14:49:55,057 log 2205836 139938138468352 Bad Request: /api/auth/login/
+WARNING 2025-04-30 14:49:55,118 log 2205837 139938138468352 Bad Request: /api/auth/login/
+WARNING 2025-04-30 14:49:55,326 log 2205840 139938138468352 Bad Request: /api/auth/login/
+WARNING 2025-04-30 14:49:59,441 log 2205837 139938138468352 Bad Request: /api/auth/login/
+WARNING 2025-04-30 14:49:59,491 log 2205836 139938138468352 Bad Request: /api/auth/login/
+WARNING 2025-04-30 14:49:59,691 log 2205840 139938138468352 Bad Request: /api/auth/login/
+WARNING 2025-04-30 14:49:59,780 log 2205838 139938138468352 Bad Request: /api/auth/login/
+WARNING 2025-04-30 14:50:23,045 log 2205836 139938138468352 Not Found: /api/bin/440393
+WARNING 2025-04-30 14:50:23,947 log 2205837 139938138468352 Not Found: /api/user/binLookup
+WARNING 2025-04-30 15:35:40,341 log 2205839 139938138468352 Unauthorized: /api/auth/token/verify/
+WARNING 2025-04-30 18:06:37,671 log 2217676 140187322765312 Unauthorized: /api/auth/token/verify/
+WARNING 2025-04-30 18:19:50,696 log 2217676 140187322765312 Unauthorized: /api/auth/token/verify/
+WARNING 2025-04-30 20:51:58,328 log 2217674 140187322765312 Unauthorized: /api/auth/token/verify/
+WARNING 2025-04-30 21:49:45,750 log 2217675 140187322765312 Unauthorized: /api/auth/token/verify/
+WARNING 2025-04-30 21:50:29,871 log 2217678 140187322765312 Unauthorized: /api/order/
+WARNING 2025-04-30 21:50:29,875 log 2217675 140187322765312 Unauthorized: /api/order/
+WARNING 2025-04-30 21:50:29,878 log 2217678 140187322765312 Unauthorized: /api/order-status/
+WARNING 2025-04-30 21:50:29,877 log 2217674 140187322765312 Unauthorized: /api/products/
+WARNING 2025-04-30 21:50:29,877 log 2217676 140187322765312 Unauthorized: /api/produksi/
+WARNING 2025-04-30 21:50:29,881 log 2217677 140187322765312 Unauthorized: /api/order/
+WARNING 2025-04-30 21:50:29,883 log 2217676 140187322765312 Unauthorized: /api/user-profiles/
+WARNING 2025-04-30 21:50:29,884 log 2217674 140187322765312 Unauthorized: /api/order-status/
+WARNING 2025-04-30 21:50:29,884 log 2217675 140187322765312 Unauthorized: /api/order/
+WARNING 2025-04-30 21:50:29,883 log 2217678 140187322765312 Unauthorized: /api/customers/
+WARNING 2025-04-30 21:50:29,887 log 2217676 140187322765312 Unauthorized: /api/customers/
+WARNING 2025-04-30 21:50:29,888 log 2217677 140187322765312 Unauthorized: /api/products/
+WARNING 2025-04-30 21:50:29,890 log 2217674 140187322765312 Unauthorized: /api/order/
+WARNING 2025-04-30 21:50:29,929 log 2217675 140187322765312 Unauthorized: /api/produksi/
+WARNING 2025-04-30 21:50:29,932 log 2217678 140187322765312 Unauthorized: /api/order/
+WARNING 2025-04-30 21:50:29,934 log 2217675 140187322765312 Unauthorized: /api/user-profiles/
+WARNING 2025-04-30 22:30:46,388 log 2217675 140187322765312 Not Found: /api/.env
+WARNING 2025-04-30 22:31:14,133 log 2217677 140187322765312 Not Found: /api/.git/config
+WARNING 2025-05-01 00:37:22,390 log 2217678 140187322765312 Unauthorized: /api/auth/token/verify/
+WARNING 2025-05-01 03:21:00,555 log 2217676 140187322765312 Not Found: /api/.config.php
+WARNING 2025-05-01 04:36:07,459 log 2217678 140187322765312 Unauthorized: /api/order/
+WARNING 2025-05-01 07:08:45,161 log 2217677 140187322765312 Not Found: /api/session/properties
+WARNING 2025-05-01 10:29:31,396 log 2217675 140187322765312 Unauthorized: /api/order/
+WARNING 2025-05-01 10:51:07,076 log 2217675 140187322765312 Unauthorized: /api/auth/token/verify/
+WARNING 2025-05-01 11:55:01,958 log 2217674 140187322765312 Unauthorized: /api/auth/token/verify/
+WARNING 2025-05-01 12:53:14,243 log 2217675 140187322765312 Bad Request: /api/auth/token/verify/
+WARNING 2025-05-01 13:07:58,788 log 2217677 140187322765312 Unauthorized: /api/auth/token/verify/
+WARNING 2025-05-01 14:45:21,971 log 2217678 140187322765312 Unauthorized: /api/auth/token/verify/
+WARNING 2025-05-01 17:07:25,675 log 2217676 140187322765312 Unauthorized: /api/auth/token/verify/
+WARNING 2025-05-01 17:08:44,044 log 2217676 140187322765312 Unauthorized: /api/auth/token/verify/
+WARNING 2025-05-01 19:09:54,578 log 2217677 140187322765312 Not Found: /api/.git/config
+WARNING 2025-05-01 19:10:06,695 log 2217675 140187322765312 Not Found: /api/.env
+WARNING 2025-05-01 19:51:50,739 log 2217677 140187322765312 Unauthorized: /api/auth/token/verify/
+WARNING 2025-05-01 19:51:52,864 log 2217678 140187322765312 Unauthorized: /api/auth/token/verify/
+WARNING 2025-05-01 19:52:47,161 log 2217675 140187322765312 Unauthorized: /api/auth/token/verify/
+WARNING 2025-05-01 22:52:51,280 log 2217674 140187322765312 Unauthorized: /api/auth/token/verify/
+WARNING 2025-05-02 01:37:01,016 log 2217678 140187322765312 Unauthorized: /api/auth/token/verify/
+WARNING 2025-05-02 01:37:15,282 log 2217678 140187322765312 Not Found: /api/dashboard/stats/
+WARNING 2025-05-02 01:37:40,255 log 2217677 140187322765312 Not Found: /api/dashboard/stats/
+WARNING 2025-05-02 01:37:42,437 log 2217678 140187322765312 Not Found: /api/dashboard/stats/
+WARNING 2025-05-02 01:37:52,339 log 2217678 140187322765312 Not Found: /api/dashboard/stats/
+WARNING 2025-05-02 01:38:00,810 log 2217674 140187322765312 Not Found: /api/dashboard/stats/
+WARNING 2025-05-02 01:43:47,413 log 2217675 140187322765312 Not Found: /api/dashboard/stats
+WARNING 2025-05-02 01:44:05,521 log 2217676 140187322765312 Not Found: /api/dashboard
+WARNING 2025-05-02 01:54:07,176 log 2217676 140187322765312 Not Found: /api/dashboard/stats
+WARNING 2025-05-02 01:54:07,251 log 2217676 140187322765312 Not Found: /api/dashboard
+WARNING 2025-05-02 01:54:11,127 log 2217674 140187322765312 Not Found: /api/dashboard/stats
+WARNING 2025-05-02 01:54:11,561 log 2217678 140187322765312 Not Found: /api/dashboard
+WARNING 2025-05-02 01:54:20,051 log 2217678 140187322765312 Not Found: /api/dashboard/stats
+WARNING 2025-05-02 01:54:20,124 log 2217678 140187322765312 Not Found: /api/dashboard
+WARNING 2025-05-02 02:04:25,043 log 2217678 140187322765312 Not Found: /api/dashboard/stats/
+WARNING 2025-05-02 02:05:54,739 log 2217674 140187322765312 Not Found: /api/dashboard/stats/
+ERROR 2025-05-02 02:07:13,425 log 2265468 140404651556864 Internal Server Error: /api/dashboard/stats
+ERROR 2025-05-02 02:07:13,572 log 2265468 140404651556864 Internal Server Error: /api/dashboard
+WARNING 2025-05-02 02:07:33,106 log 2265468 140404651556864 Bad Request: /api/auth/token/verify/
+ERROR 2025-05-02 02:07:35,397 log 2265468 140404651556864 Internal Server Error: /api/dashboard/stats
+ERROR 2025-05-02 02:07:35,484 log 2265470 140404651556864 Internal Server Error: /api/dashboard
+WARNING 2025-05-02 02:40:21,176 log 2266027 139958230528000 Unauthorized: /api/auth/token/verify/
+WARNING 2025-05-02 03:00:37,919 log 2266025 139958230528000 Not Found: /api/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php
+WARNING 2025-05-02 10:32:06,526 log 2266028 139958230528000 Unauthorized: /api/auth/token/verify/
+WARNING 2025-05-02 11:35:09,246 log 2266025 139958230528000 Unauthorized: /api/order/
+WARNING 2025-05-02 11:35:11,154 log 2266029 139958230528000 Unauthorized: /api/auth/token/verify/
+WARNING 2025-05-02 11:45:31,069 log 2266029 139958230528000 Unauthorized: /api/auth/token/verify/
+WARNING 2025-05-02 11:45:40,158 log 2266028 139958230528000 Unauthorized: /api/auth/token/verify/
+WARNING 2025-05-02 11:45:54,264 log 2266026 139958230528000 Unauthorized: /api/auth/token/verify/
+WARNING 2025-05-02 12:39:57,450 log 2266027 139958230528000 Unauthorized: /api/auth/token/verify/
+WARNING 2025-05-02 13:03:48,769 log 2266027 139958230528000 Unauthorized: /api/auth/token/verify/
+WARNING 2025-05-02 13:08:05,938 log 2266029 139958230528000 Not Found: /api/report/daily-orders/
+WARNING 2025-05-02 13:09:06,714 log 2266025 139958230528000 Not Found: /api/report/daily-orders/
+WARNING 2025-05-02 13:09:31,993 log 2266026 139958230528000 Not Found: /api/report/daily-orders/
+WARNING 2025-05-02 13:17:11,464 log 2266028 139958230528000 Not Found: /api/order/report/daily/
+WARNING 2025-05-02 13:17:15,760 log 2266025 139958230528000 Not Found: /api/order/report/daily/
+WARNING 2025-05-02 13:17:16,886 log 2266027 139958230528000 Not Found: /api/order/report/daily/
+WARNING 2025-05-02 13:49:56,547 log 2280859 140232258412544 Unauthorized: /api/auth/token/verify/
+ERROR 2025-05-02 14:03:00,497 log 2281260 139861295321088 Internal Server Error: /api/order/report/monthly/
+ERROR 2025-05-02 14:18:53,054 log 2281682 140692942430208 Internal Server Error: /api/order/report/monthly/
+ERROR 2025-05-02 14:20:30,389 log 2281680 140692942430208 Internal Server Error: /api/order/report/monthly/
+ERROR 2025-05-02 14:32:43,138 log 2282100 140223053979648 Internal Server Error: /api/order/report/monthly/
+ERROR 2025-05-02 14:33:09,891 log 2282101 140223053979648 Internal Server Error: /api/order/report/daily/
+ERROR 2025-05-02 14:33:40,542 log 2282103 140223053979648 Internal Server Error: /api/order/report/monthly/
+ERROR 2025-05-02 14:40:40,633 log 2282401 140451384430592 Internal Server Error: /api/order/report/monthly/
+ERROR 2025-05-02 14:40:43,211 log 2282403 140451384430592 Internal Server Error: /api/order/report/daily/
+ERROR 2025-05-02 14:40:45,425 log 2282400 140451384430592 Internal Server Error: /api/order/report/daily/
+ERROR 2025-05-02 14:41:27,320 log 2282404 140451384430592 Internal Server Error: /api/order/report/daily/
+ERROR 2025-05-02 14:41:54,553 log 2282403 140451384430592 Internal Server Error: /api/order/
+Traceback (most recent call last):
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+psycopg2.errors.UndefinedColumn: column rumah_akrilik_app_order.total_orders does not exist
+LINE 1: ...asang", "rumah_akrilik_app_order"."biaya_survey", "rumah_akr...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/viewsets.py", line 124, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/mixins.py", line 40, in list
+    page = self.paginate_queryset(queryset)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/generics.py", line 175, in paginate_queryset
+    return self.paginator.paginate_queryset(queryset, self.request, view=self)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/pagination.py", line 222, in paginate_queryset
+    return list(self.page)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/paginator.py", line 174, in __len__
+    return len(self.object_list)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 380, in __len__
+    self._fetch_all()
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 1881, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 84, in _execute
+    with self.db.wrap_database_errors:
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+django.db.utils.ProgrammingError: column rumah_akrilik_app_order.total_orders does not exist
+LINE 1: ...asang", "rumah_akrilik_app_order"."biaya_survey", "rumah_akr...
+                                                             ^
+
+ERROR 2025-05-02 14:42:26,376 log 2282404 140451384430592 Internal Server Error: /api/order/
+Traceback (most recent call last):
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+psycopg2.errors.UndefinedColumn: column rumah_akrilik_app_order.total_orders does not exist
+LINE 1: ...asang", "rumah_akrilik_app_order"."biaya_survey", "rumah_akr...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/viewsets.py", line 124, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/mixins.py", line 40, in list
+    page = self.paginate_queryset(queryset)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/generics.py", line 175, in paginate_queryset
+    return self.paginator.paginate_queryset(queryset, self.request, view=self)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/pagination.py", line 222, in paginate_queryset
+    return list(self.page)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/paginator.py", line 174, in __len__
+    return len(self.object_list)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 380, in __len__
+    self._fetch_all()
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 1881, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 84, in _execute
+    with self.db.wrap_database_errors:
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+django.db.utils.ProgrammingError: column rumah_akrilik_app_order.total_orders does not exist
+LINE 1: ...asang", "rumah_akrilik_app_order"."biaya_survey", "rumah_akr...
+                                                             ^
+
+ERROR 2025-05-02 14:42:51,262 log 2282400 140451384430592 Internal Server Error: /api/order/report/monthly/
+WARNING 2025-05-02 15:05:11,177 log 2282401 140451384430592 Not Found: /api/.env
+WARNING 2025-05-02 15:05:13,634 log 2282404 140451384430592 Not Found: /api/v1/.env
+WARNING 2025-05-02 15:14:00,923 log 2283355 139903265124352 Unauthorized: /api/auth/token/verify/
+ERROR 2025-05-02 15:14:05,292 log 2283359 139903265124352 Internal Server Error: /api/order/
+Traceback (most recent call last):
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+psycopg2.errors.UndefinedColumn: column rumah_akrilik_app_order.total_orders does not exist
+LINE 1: ...asang", "rumah_akrilik_app_order"."biaya_survey", "rumah_akr...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/viewsets.py", line 124, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/mixins.py", line 40, in list
+    page = self.paginate_queryset(queryset)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/generics.py", line 175, in paginate_queryset
+    return self.paginator.paginate_queryset(queryset, self.request, view=self)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/pagination.py", line 222, in paginate_queryset
+    return list(self.page)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/paginator.py", line 174, in __len__
+    return len(self.object_list)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 380, in __len__
+    self._fetch_all()
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 1881, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 84, in _execute
+    with self.db.wrap_database_errors:
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+django.db.utils.ProgrammingError: column rumah_akrilik_app_order.total_orders does not exist
+LINE 1: ...asang", "rumah_akrilik_app_order"."biaya_survey", "rumah_akr...
+                                                             ^
+
+ERROR 2025-05-02 15:14:08,137 log 2283358 139903265124352 Internal Server Error: /api/order/
+Traceback (most recent call last):
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+psycopg2.errors.UndefinedColumn: column rumah_akrilik_app_order.total_orders does not exist
+LINE 1: ...asang", "rumah_akrilik_app_order"."biaya_survey", "rumah_akr...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/viewsets.py", line 124, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/mixins.py", line 40, in list
+    page = self.paginate_queryset(queryset)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/generics.py", line 175, in paginate_queryset
+    return self.paginator.paginate_queryset(queryset, self.request, view=self)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/pagination.py", line 222, in paginate_queryset
+    return list(self.page)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/paginator.py", line 174, in __len__
+    return len(self.object_list)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 380, in __len__
+    self._fetch_all()
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 1881, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 84, in _execute
+    with self.db.wrap_database_errors:
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+django.db.utils.ProgrammingError: column rumah_akrilik_app_order.total_orders does not exist
+LINE 1: ...asang", "rumah_akrilik_app_order"."biaya_survey", "rumah_akr...
+                                                             ^
+
+ERROR 2025-05-02 15:14:54,425 log 2283359 139903265124352 Internal Server Error: /api/order/
+Traceback (most recent call last):
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+psycopg2.errors.UndefinedColumn: column rumah_akrilik_app_order.total_orders does not exist
+LINE 1: ...asang", "rumah_akrilik_app_order"."biaya_survey", "rumah_akr...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/viewsets.py", line 124, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/mixins.py", line 40, in list
+    page = self.paginate_queryset(queryset)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/generics.py", line 175, in paginate_queryset
+    return self.paginator.paginate_queryset(queryset, self.request, view=self)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/pagination.py", line 222, in paginate_queryset
+    return list(self.page)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/paginator.py", line 174, in __len__
+    return len(self.object_list)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 380, in __len__
+    self._fetch_all()
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 1881, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 84, in _execute
+    with self.db.wrap_database_errors:
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+django.db.utils.ProgrammingError: column rumah_akrilik_app_order.total_orders does not exist
+LINE 1: ...asang", "rumah_akrilik_app_order"."biaya_survey", "rumah_akr...
+                                                             ^
+
+ERROR 2025-05-02 15:18:07,686 log 2283355 139903265124352 Internal Server Error: /api/order/
+Traceback (most recent call last):
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+psycopg2.errors.UndefinedColumn: column rumah_akrilik_app_order.total_orders does not exist
+LINE 1: ...asang", "rumah_akrilik_app_order"."biaya_survey", "rumah_akr...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/viewsets.py", line 124, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/mixins.py", line 40, in list
+    page = self.paginate_queryset(queryset)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/generics.py", line 175, in paginate_queryset
+    return self.paginator.paginate_queryset(queryset, self.request, view=self)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/pagination.py", line 222, in paginate_queryset
+    return list(self.page)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/paginator.py", line 174, in __len__
+    return len(self.object_list)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 380, in __len__
+    self._fetch_all()
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 1881, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 84, in _execute
+    with self.db.wrap_database_errors:
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+django.db.utils.ProgrammingError: column rumah_akrilik_app_order.total_orders does not exist
+LINE 1: ...asang", "rumah_akrilik_app_order"."biaya_survey", "rumah_akr...
+                                                             ^
+
+ERROR 2025-05-02 15:18:31,206 log 2283357 139903265124352 Internal Server Error: /api/order/
+Traceback (most recent call last):
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+psycopg2.errors.UndefinedColumn: column rumah_akrilik_app_order.total_orders does not exist
+LINE 1: ...asang", "rumah_akrilik_app_order"."biaya_survey", "rumah_akr...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/viewsets.py", line 124, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/mixins.py", line 40, in list
+    page = self.paginate_queryset(queryset)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/generics.py", line 175, in paginate_queryset
+    return self.paginator.paginate_queryset(queryset, self.request, view=self)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/pagination.py", line 222, in paginate_queryset
+    return list(self.page)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/paginator.py", line 174, in __len__
+    return len(self.object_list)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 380, in __len__
+    self._fetch_all()
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 1881, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 84, in _execute
+    with self.db.wrap_database_errors:
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+django.db.utils.ProgrammingError: column rumah_akrilik_app_order.total_orders does not exist
+LINE 1: ...asang", "rumah_akrilik_app_order"."biaya_survey", "rumah_akr...
+                                                             ^
+
+WARNING 2025-05-02 15:30:44,461 log 2283359 139903265124352 Not Found: /api/.env
+WARNING 2025-05-02 15:31:08,898 log 2283357 139903265124352 Not Found: /api/.git/config
+ERROR 2025-05-02 15:39:11,165 log 2284275 140309740941312 Internal Server Error: /api/order/
+Traceback (most recent call last):
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+psycopg2.errors.UndefinedColumn: column rumah_akrilik_app_order.total_orders does not exist
+LINE 1: ...asang", "rumah_akrilik_app_order"."biaya_survey", "rumah_akr...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/viewsets.py", line 124, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/mixins.py", line 40, in list
+    page = self.paginate_queryset(queryset)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/generics.py", line 175, in paginate_queryset
+    return self.paginator.paginate_queryset(queryset, self.request, view=self)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/pagination.py", line 222, in paginate_queryset
+    return list(self.page)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/paginator.py", line 174, in __len__
+    return len(self.object_list)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 380, in __len__
+    self._fetch_all()
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 1881, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 84, in _execute
+    with self.db.wrap_database_errors:
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+django.db.utils.ProgrammingError: column rumah_akrilik_app_order.total_orders does not exist
+LINE 1: ...asang", "rumah_akrilik_app_order"."biaya_survey", "rumah_akr...
+                                                             ^
+
+ERROR 2025-05-02 15:39:59,220 log 2284277 140309740941312 Internal Server Error: /api/order/
+Traceback (most recent call last):
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+psycopg2.errors.UndefinedColumn: column rumah_akrilik_app_order.total_orders does not exist
+LINE 1: ...asang", "rumah_akrilik_app_order"."biaya_survey", "rumah_akr...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/viewsets.py", line 124, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/mixins.py", line 40, in list
+    page = self.paginate_queryset(queryset)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/generics.py", line 175, in paginate_queryset
+    return self.paginator.paginate_queryset(queryset, self.request, view=self)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/pagination.py", line 222, in paginate_queryset
+    return list(self.page)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/paginator.py", line 174, in __len__
+    return len(self.object_list)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 380, in __len__
+    self._fetch_all()
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 1881, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 84, in _execute
+    with self.db.wrap_database_errors:
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+django.db.utils.ProgrammingError: column rumah_akrilik_app_order.total_orders does not exist
+LINE 1: ...asang", "rumah_akrilik_app_order"."biaya_survey", "rumah_akr...
+                                                             ^
+
+ERROR 2025-05-02 15:40:23,168 log 2284277 140309740941312 Internal Server Error: /api/order/
+Traceback (most recent call last):
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+psycopg2.errors.UndefinedColumn: column rumah_akrilik_app_order.total_orders does not exist
+LINE 1: ...asang", "rumah_akrilik_app_order"."biaya_survey", "rumah_akr...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/viewsets.py", line 124, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/mixins.py", line 40, in list
+    page = self.paginate_queryset(queryset)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/generics.py", line 175, in paginate_queryset
+    return self.paginator.paginate_queryset(queryset, self.request, view=self)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/pagination.py", line 222, in paginate_queryset
+    return list(self.page)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/paginator.py", line 174, in __len__
+    return len(self.object_list)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 380, in __len__
+    self._fetch_all()
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 1881, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 84, in _execute
+    with self.db.wrap_database_errors:
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+django.db.utils.ProgrammingError: column rumah_akrilik_app_order.total_orders does not exist
+LINE 1: ...asang", "rumah_akrilik_app_order"."biaya_survey", "rumah_akr...
+                                                             ^
+
+ERROR 2025-05-02 15:41:06,986 log 2284277 140309740941312 Internal Server Error: /api/order/
+Traceback (most recent call last):
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+psycopg2.errors.UndefinedColumn: column rumah_akrilik_app_order.total_orders does not exist
+LINE 1: ...asang", "rumah_akrilik_app_order"."biaya_survey", "rumah_akr...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/viewsets.py", line 124, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/mixins.py", line 40, in list
+    page = self.paginate_queryset(queryset)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/generics.py", line 175, in paginate_queryset
+    return self.paginator.paginate_queryset(queryset, self.request, view=self)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/pagination.py", line 222, in paginate_queryset
+    return list(self.page)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/paginator.py", line 174, in __len__
+    return len(self.object_list)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 380, in __len__
+    self._fetch_all()
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 1881, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 84, in _execute
+    with self.db.wrap_database_errors:
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+django.db.utils.ProgrammingError: column rumah_akrilik_app_order.total_orders does not exist
+LINE 1: ...asang", "rumah_akrilik_app_order"."biaya_survey", "rumah_akr...
+                                                             ^
+
+ERROR 2025-05-02 15:42:47,189 log 2284278 140309740941312 Internal Server Error: /api/order/
+Traceback (most recent call last):
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+psycopg2.errors.UndefinedColumn: column rumah_akrilik_app_order.total_orders does not exist
+LINE 1: ...asang", "rumah_akrilik_app_order"."biaya_survey", "rumah_akr...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/viewsets.py", line 124, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/mixins.py", line 40, in list
+    page = self.paginate_queryset(queryset)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/generics.py", line 175, in paginate_queryset
+    return self.paginator.paginate_queryset(queryset, self.request, view=self)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/pagination.py", line 222, in paginate_queryset
+    return list(self.page)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/paginator.py", line 174, in __len__
+    return len(self.object_list)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 380, in __len__
+    self._fetch_all()
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 1881, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 84, in _execute
+    with self.db.wrap_database_errors:
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+django.db.utils.ProgrammingError: column rumah_akrilik_app_order.total_orders does not exist
+LINE 1: ...asang", "rumah_akrilik_app_order"."biaya_survey", "rumah_akr...
+                                                             ^
+
+ERROR 2025-05-02 15:43:28,768 log 2284277 140309740941312 Internal Server Error: /api/order/
+Traceback (most recent call last):
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+psycopg2.errors.UndefinedColumn: column rumah_akrilik_app_order.total_orders does not exist
+LINE 1: ...asang", "rumah_akrilik_app_order"."biaya_survey", "rumah_akr...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/viewsets.py", line 124, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/mixins.py", line 40, in list
+    page = self.paginate_queryset(queryset)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/generics.py", line 175, in paginate_queryset
+    return self.paginator.paginate_queryset(queryset, self.request, view=self)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/pagination.py", line 222, in paginate_queryset
+    return list(self.page)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/paginator.py", line 174, in __len__
+    return len(self.object_list)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 380, in __len__
+    self._fetch_all()
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 1881, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 84, in _execute
+    with self.db.wrap_database_errors:
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+django.db.utils.ProgrammingError: column rumah_akrilik_app_order.total_orders does not exist
+LINE 1: ...asang", "rumah_akrilik_app_order"."biaya_survey", "rumah_akr...
+                                                             ^
+
+ERROR 2025-05-02 16:02:12,492 log 2284804 140328454520832 Internal Server Error: /api/order/
+Traceback (most recent call last):
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/viewsets.py", line 124, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/mixins.py", line 43, in list
+    return self.get_paginated_response(serializer.data)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 795, in data
+    ret = super().data
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 249, in data
+    self._data = self.to_representation(self.instance)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 713, in to_representation
+    return [
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 714, in <listcomp>
+    self.child.to_representation(item) for item in iterable
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 523, in to_representation
+    for field in fields:
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 384, in _readable_fields
+    for field in self.fields.values():
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 372, in fields
+    for key, value in self.get_fields().items():
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 1079, in get_fields
+    field_names = self.get_field_names(declared_fields, info)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 1202, in get_field_names
+    assert field_name in fields, (
+AssertionError: The field 'total_amount' was included on serializer OrderSerializer in the 'exclude' option, but does not match any model field.
+ERROR 2025-05-02 16:03:13,672 log 2284805 140328454520832 Internal Server Error: /api/order/
+Traceback (most recent call last):
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/viewsets.py", line 124, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/mixins.py", line 43, in list
+    return self.get_paginated_response(serializer.data)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 795, in data
+    ret = super().data
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 249, in data
+    self._data = self.to_representation(self.instance)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 713, in to_representation
+    return [
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 714, in <listcomp>
+    self.child.to_representation(item) for item in iterable
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 523, in to_representation
+    for field in fields:
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 384, in _readable_fields
+    for field in self.fields.values():
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 372, in fields
+    for key, value in self.get_fields().items():
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 1079, in get_fields
+    field_names = self.get_field_names(declared_fields, info)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 1202, in get_field_names
+    assert field_name in fields, (
+AssertionError: The field 'total_amount' was included on serializer OrderSerializer in the 'exclude' option, but does not match any model field.
+ERROR 2025-05-02 16:04:00,162 log 2284804 140328454520832 Internal Server Error: /api/order/
+Traceback (most recent call last):
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/viewsets.py", line 124, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/mixins.py", line 43, in list
+    return self.get_paginated_response(serializer.data)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 795, in data
+    ret = super().data
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 249, in data
+    self._data = self.to_representation(self.instance)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 713, in to_representation
+    return [
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 714, in <listcomp>
+    self.child.to_representation(item) for item in iterable
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 523, in to_representation
+    for field in fields:
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 384, in _readable_fields
+    for field in self.fields.values():
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 372, in fields
+    for key, value in self.get_fields().items():
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 1079, in get_fields
+    field_names = self.get_field_names(declared_fields, info)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 1202, in get_field_names
+    assert field_name in fields, (
+AssertionError: The field 'total_amount' was included on serializer OrderSerializer in the 'exclude' option, but does not match any model field.
+ERROR 2025-05-02 16:04:12,901 log 2284805 140328454520832 Internal Server Error: /api/order/
+Traceback (most recent call last):
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/viewsets.py", line 124, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/mixins.py", line 43, in list
+    return self.get_paginated_response(serializer.data)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 795, in data
+    ret = super().data
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 249, in data
+    self._data = self.to_representation(self.instance)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 713, in to_representation
+    return [
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 714, in <listcomp>
+    self.child.to_representation(item) for item in iterable
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 523, in to_representation
+    for field in fields:
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 384, in _readable_fields
+    for field in self.fields.values():
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 372, in fields
+    for key, value in self.get_fields().items():
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 1079, in get_fields
+    field_names = self.get_field_names(declared_fields, info)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 1202, in get_field_names
+    assert field_name in fields, (
+AssertionError: The field 'total_amount' was included on serializer OrderSerializer in the 'exclude' option, but does not match any model field.
+ERROR 2025-05-02 16:04:37,575 log 2284806 140328454520832 Internal Server Error: /api/order/
+Traceback (most recent call last):
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/viewsets.py", line 124, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/mixins.py", line 43, in list
+    return self.get_paginated_response(serializer.data)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 795, in data
+    ret = super().data
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 249, in data
+    self._data = self.to_representation(self.instance)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 713, in to_representation
+    return [
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 714, in <listcomp>
+    self.child.to_representation(item) for item in iterable
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 523, in to_representation
+    for field in fields:
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 384, in _readable_fields
+    for field in self.fields.values():
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 372, in fields
+    for key, value in self.get_fields().items():
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 1079, in get_fields
+    field_names = self.get_field_names(declared_fields, info)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 1202, in get_field_names
+    assert field_name in fields, (
+AssertionError: The field 'total_amount' was included on serializer OrderSerializer in the 'exclude' option, but does not match any model field.
+ERROR 2025-05-02 16:04:49,095 log 2284803 140328454520832 Internal Server Error: /api/order/
+Traceback (most recent call last):
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/views/decorators/csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/viewsets.py", line 124, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/mixins.py", line 43, in list
+    return self.get_paginated_response(serializer.data)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 795, in data
+    ret = super().data
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 249, in data
+    self._data = self.to_representation(self.instance)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 713, in to_representation
+    return [
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 714, in <listcomp>
+    self.child.to_representation(item) for item in iterable
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 523, in to_representation
+    for field in fields:
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 384, in _readable_fields
+    for field in self.fields.values():
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 372, in fields
+    for key, value in self.get_fields().items():
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 1079, in get_fields
+    field_names = self.get_field_names(declared_fields, info)
+  File "/root/rumah-akrilik/venv/lib/python3.10/site-packages/rest_framework/serializers.py", line 1202, in get_field_names
+    assert field_name in fields, (
+AssertionError: The field 'total_amount' was included on serializer OrderSerializer in the 'exclude' option, but does not match any model field.
+WARNING 2025-05-02 16:31:54,991 log 2286297 140600610611200 Unauthorized: /api/auth/token/verify/
+WARNING 2025-05-02 17:37:32,756 log 2288576 140453991469056 Unauthorized: /api/auth/token/verify/
+WARNING 2025-05-02 19:05:37,458 log 2291930 139766625583104 Unauthorized: /api/auth/token/verify/
+WARNING 2025-05-04 13:47:00,251 log 2329817 139834811527168 Not Found: /api/orders/

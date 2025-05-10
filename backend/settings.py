@@ -16,6 +16,8 @@ import os
 from datetime import timedelta
 import sys
 from django.core.management.utils import get_random_secret_key
+from django.views.decorators.csrf import csrf_exempt
+from corsheaders.defaults import default_headers
 
 # Build paths inside the project
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -33,7 +35,9 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = False
 SECURE_HSTS_PRELOAD = False
 SECURE_SSL_REDIRECT = False  # Tetap False karena redirect di-handle Nginx
 SESSION_COOKIE_SECURE = False  # TRUE di production, FALSE di debug
-CSRF_COOKIE_SECURE = False     # TRUE di production, FALSE di debug
+CSRF_COOKIE_SECURE = True if not DEBUG else False
+CSRF_COOKIE_HTTPONLY = False  # Harus False agar JavaScript dapat mengaksesnya
+CSRF_USE_SESSIONS = False  # Untuk REST API, biasanya menggunakan cookies
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
 
@@ -43,9 +47,8 @@ USE_X_FORWARDED_HOST = True
 ALLOWED_HOSTS = ['*', "rumahakrilik.id"]  # sementara izinkan semua host untuk debugging
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://rumahakrilik.id',
-    'https://www.rumahakrilik.id',
-    'http://45.77.252.39',
+    "https://rumahakrilik.id",
+    "http://localhost:3000",
 ]
 
 # ======================
@@ -58,38 +61,22 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
-    # Third-party apps
-    'django_rest_passwordreset',
-    'crum',
     'corsheaders',
-    'django_filters',
-    'django_extensions',
     'rest_framework',
-    'rest_framework.authtoken',
-    'rest_framework_simplejwt',
-    'rest_framework_simplejwt.token_blacklist',
-    'drf_yasg',
-    'django_cleanup.apps.CleanupConfig',
-    'debug_toolbar',
-    
-    # Local apps
-    'rumah_akrilik_app.apps.RumahAkrilikAppConfig',
-
-    'authentication',  # harus ada
+    'django_filters',
+    'rumah_akrilik_app',
+    # pastikan semua app terdaftar
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',  # harus di awal
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
-    'crum.CurrentRequestUserMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -178,18 +165,38 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # ======================
 # CORS CONFIGURATION
 # ======================
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = True  # Untuk development
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+] + [
+    'cache-control',
+    'pragma',
+    'access-control-allow-origin',
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
 CORS_ALLOWED_ORIGINS = [
     "https://rumahakrilik.id",
-    "https://www.rumahakrilik.id",
-    "http://45.77.252.39",
     "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
-CORS_ALLOW_CREDENTIALS = True
-CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
-CORS_ALLOW_METHODS = [
-    'DELETE', 'GET', 'OPTIONS', 'PATCH', 'POST', 'PUT',
 ]
 
 # ======================
@@ -230,21 +237,22 @@ REST_FRAMEWORK = {
     'DATETIME_FORMAT': '%Y-%m-%d %H:%M:%S',
     'DATE_FORMAT': '%Y-%m-%d',
     'TIME_FORMAT': '%H:%M:%S',
+    'EXCEPTION_HANDLER': 'rumah_akrilik_app.views.custom_exception_handler',
 }
 
 # ======================
 # JWT CONFIGURATION
 # ======================
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
-    'ROTATE_REFRESH_TOKENS': True,
+    'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
     'UPDATE_LAST_LOGIN': True,
     'ALGORITHM': 'HS256',
     'SIGNING_KEY': SECRET_KEY,
     'VERIFYING_KEY': None,
-    'AUTH_HEADER_TYPES': ('Bearer', 'JWT'), # Pastikan Bearer ada
+    'AUTH_HEADER_TYPES': ('Bearer',),
     'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
     'USER_ID_FIELD': 'id',
     'USER_ID_CLAIM': 'user_id',
@@ -252,9 +260,8 @@ SIMPLE_JWT = {
     'TOKEN_TYPE_CLAIM': 'token_type',
     'JTI_CLAIM': 'jti',
     'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
-    'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
-    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
-    'LEEWAY': timedelta(seconds=10), # <-- TAMBAHKAN BARIS INI
+    'SLIDING_TOKEN_LIFETIME': timedelta(days=1),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=7),
 }
 
 # ======================
@@ -284,46 +291,28 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-            'style': '{',
-        },
-        'simple': {
-            'format': '{levelname} {message}',
+            'format': '{levelname} {asctime} {module} {message}',
             'style': '{',
         },
     },
     'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple', # Atau 'verbose'
-            'level': 'DEBUG', # Pastikan level cukup rendah
-        },
         'file': {
-            'level': 'DEBUG', # Pastikan level cukup rendah
+            'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs', 'debug.log'), # Sesuaikan path log file
+            'filename': '/var/log/django/debug.log',  # Pastikan folder /var/log/django/ sudah ada
             'formatter': 'verbose',
         },
-        'mail_admins': {
-            'level': 'ERROR',
-            'class': 'django.utils.log.AdminEmailHandler',
-            'include_html': True,
-        }
-    },
-    'root': {
-        'handlers': ['console'],
-        'level': 'WARNING',
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
     },
     'loggers': {
         'django': {
-            'handlers': ['console', 'file', 'mail_admins'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
-            'propagate': False,
-        },
-        'rumah_akrilik': {
-            'handlers': ['console', 'file'],
-            'level': 'DEBUG' if DEBUG else 'INFO',
-            'propagate': False,
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
     },
 }

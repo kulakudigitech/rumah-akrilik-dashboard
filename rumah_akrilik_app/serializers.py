@@ -6,7 +6,7 @@ from .models import (
     CustomerAddress, ProductImage, OrderStatus, ProductionMaterial, Supplier,
     MarketingCampaign, Order, Produksi, Absensi, Product, RealisasiKunjunganRR,
     Role, UserProfile, ProductCategory, OrderItem, ProductionJob, Inventory,
-    Transaction, Customer
+    Transaction, Customer, ProductionStage, ProductionTracking
 )
 import logging
 from decimal import Decimal, InvalidOperation # Import Decimal dan InvalidOperation
@@ -32,11 +32,67 @@ class UserSerializer(serializers.ModelSerializer):
 class RoleSerializer(serializers.ModelSerializer):
     class Meta: model = Role; fields = '__all__'
 
+# Update serializer UserProfileSerializer
 class UserProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
-    role = RoleSerializer(read_only=True)
-    role_id = serializers.PrimaryKeyRelatedField( queryset=Role.objects.all(), source='role', write_only=True, required=False, allow_null=True )
-    class Meta: model = UserProfile; fields = '__all__'
+    # Tambahkan roles serializer
+    roles = RoleSerializer(many=True, read_only=True)
+    # Tambahkan field untuk menerima daftar ID role saat update
+    role_ids = serializers.ListField(
+        child=serializers.IntegerField(),
+        write_only=True,
+        required=False
+    )
+    
+    class Meta:
+        model = UserProfile
+        fields = ['id', 'user', 'roles', 'phone', 'address', 'avatar', 
+                  'job_title', 'department', 'notes', 'tipe_karyawan', 
+                  'is_active', 'created_at', 'updated_at', 'role_ids']
+    
+    def update(self, instance, validated_data):
+        # Handle role_ids separately
+        role_ids = validated_data.pop('role_ids', None)
+        
+        # Update other fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        
+        # Update roles if provided
+        if role_ids is not None:
+            instance.roles.clear()
+            for role_id in role_ids:
+                try:
+                    role = Role.objects.get(id=role_id)
+                    instance.roles.add(role)
+                except Role.DoesNotExist:
+                    pass
+        
+        return instance
+
+# ======================
+# Basic Serializers (Add these)
+# ======================
+class ProductBasicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ['id', 'name', 'base_price', 'code']  # Adjust fields as needed
+
+class UserBasicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'first_name', 'last_name']
+
+class CustomerBasicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Customer
+        fields = ['id', 'name', 'phone', 'email']
+
+class OrderStatusBasicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderStatus
+        fields = ['id', 'name']
 
 # ======================
 # Product Management
@@ -71,149 +127,97 @@ class OrderStatusSerializer(serializers.ModelSerializer):
     class Meta: model = OrderStatus; fields = '__all__'
 
 # --- Serializer untuk OrderItem ---
+# --- PERBAIKAN OrderItemSerializer ---
 class OrderItemSerializer(serializers.ModelSerializer):
-    # Menggunakan source='product' untuk menulis PrimaryKeyField menjadi instance Model
+    # Untuk Read (GET): Tampilkan objek produk dasar
+    product = ProductBasicSerializer(read_only=True)
+    # Untuk Write (POST/PUT/PATCH): Terima product_id
     product_id = serializers.PrimaryKeyRelatedField(
         queryset=Product.objects.filter(is_active=True),
-        source='product', # Map 'product_id' input ke field 'product' instance
+        source='product', # Map ke field 'product'
         write_only=True,
-        label="Product ID" # Label untuk pesan error lebih jelas
+        label="Product ID"
     )
-    nama_produk = serializers.CharField(
-        max_length=255,
-        required=True,
-        allow_blank=False,
-        allow_null=False, # Pastikan tidak null
-        label="Nama Produk (di Order)" # Label lebih jelas
-    )
-    quantity = serializers.IntegerField(
-        min_value=1,
-        required=True, # Pastikan quantity required
-        label="Quantity" # Label lebih jelas
-    )
-    unit_price = serializers.DecimalField(
-        max_digits=12,
-        decimal_places=2,
-        min_value=Decimal('0'), # Gunakan Decimal instance untuk min_value
-        required=True, # Pastikan harga required
-        label="Harga Satuan" # Label lebih jelas
-    )
-    # discount = serializers.DecimalField(max_digits=12, decimal_places=2, default=0) # Uncomment jika dipakai
-    specifications = serializers.JSONField(required=False, default=dict, allow_null=True) # Allow null and default dict
-    notes = serializers.CharField(allow_blank=True, required=False, allow_null=True) # Allow blank and null
-
-    # Field read-only untuk menampilkan detail produk terkait (opsional)
-    # product_detail = ProductSerializer(source='product', read_only=True) # Jika perlu detail produk di response
+    # Pastikan field lain sesuai model dan kebutuhan
+    nama_produk = serializers.CharField(max_length=255, required=True, allow_blank=False)
+    quantity = serializers.IntegerField(min_value=1, required=True)
+    unit_price = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=Decimal('0'), required=True)
+    discount = serializers.DecimalField(max_digits=12, decimal_places=2, default=0, required=False)
+    specifications = serializers.JSONField(required=False, default=dict, allow_null=True)
+    notes = serializers.CharField(allow_blank=True, required=False, allow_null=True)
+    total_price = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True) # Dari property model
 
     class Meta:
         model = OrderItem
         fields = [
             'id',
-            'product_id', # Untuk input (write_only)
-            # 'product_detail', # Untuk output (read_only) - opsional
+            'product',      # Tampilkan ini saat GET (read_only=True di atas)
+            'product_id',   # Terima ini saat POST/PUT/PATCH (write_only=True)
             'nama_produk',
             'quantity',
             'unit_price',
-            # 'discount', # Uncomment jika dipakai
+            'discount',
             'specifications',
             'notes',
-            'total_price' # Property dari model, read-only
+            'total_price'
         ]
-        read_only_fields = ['id', 'total_price'] # total_price adalah @property
+        read_only_fields = ['id', 'total_price', 'product'] # product read-only karena kita pakai product_id untuk write
 
-    # --- TAMBAHKAN DEBUG VALIDASI DI SINI ---
     def validate(self, data):
-        # Ini dijalankan SETELAH validasi field-level default DRF
-        # Jadi, jika field required/allow_blank/min_value gagal, error sudah terkumpul
-        logger.info(f">>> LOGGER INFO OrderItemSerializer validate data received: {data}")
-        # data di sini seharusnya sudah divalidasi field-level dan berisi instance model
-        # jika PrimaryKeyRelatedField berhasil.
+        logger.info(f"[OrderItemSerializer Validate] Data received: {data}")
+        # Validasi tambahan jika perlu
+        return data
+# --- AKHIR PERBAIKAN OrderItemSerializer ---
 
-        # Check if the 'product' instance was successfully resolved by product_id
-        product_instance = data.get('product')
-        if not product_instance:
-             # Jika sampai sini dan product_instance masih None, berarti product_id yang dikirim invalid/tidak aktif
-             logger.error(f">>> ERROR OrderItemSerializer validation: Product instance is missing. Input product_id was {self.initial_data.get('product_id')}")
-             # DRF PrimaryKeyRelatedField harusnya sudah menangkap ini, tapi ini fallback log
+# --- Serializer untuk ProductionStage ---
+class ProductionStageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductionStage
+        fields = '__all__'
 
-        # Checks on data that survived field-level validation (optional but can help)
-        # nama_produk = data.get('nama_produk')
-        # if not nama_produk or not str(nama_produk).strip():
-        #     logger.error(">>> ERROR OrderItemSerializer validate: nama_produk is effectively empty AFTER field validation.")
-
-        # quantity = data.get('quantity')
-        # if quantity is None or quantity < 1:
-        #      logger.error(f">>> ERROR OrderItemSerializer validate: Invalid quantity AFTER field validation: {quantity}")
-
-        # unit_price = data.get('unit_price')
-        # try:
-        #    price_decimal = Decimal(str(unit_price)) # Convert to string first
-        #    if price_decimal < 0:
-        #        logger.error(f">>> ERROR OrderItemSerializer validate: Invalid unit_price AFTER field validation: {unit_price}")
-        # except (InvalidOperation, TypeError, ValueError):
-        #    logger.error(f">>> ERROR OrderItemSerializer validate: unit_price not decimal AFTER field validation: {unit_price}")
-
-
-        logger.info(">>> LOGGER INFO OrderItemSerializer validation finished.")
-        return data # Selalu kembalikan data
-
-    # Jika perlu validasi di level representasi (data sebelum masuk serializer), gunakan .to_internal_value
-    # def to_internal_value(self, data):
-    #     # Log data mentah per item sebelum validasi field
-    #     logger.info(f">>> LOGGER INFO OrderItemSerializer to_internal_value data: {data}")
-    #     return super().to_internal_value(data)
-
-    # Jika perlu memformat data setelah validasi, gunakan .to_representation
-    # def to_representation(self, instance):
-    #      representation = super().to_representation(instance)
-    #      # Modifikasi representasi jika perlu
-    #      return representation
-
-# --- Akhir Serializer untuk OrderItem ---
-
+# --- Serializer untuk ProductionTracking ---
+class ProductionTrackingSerializer(serializers.ModelSerializer):
+    stage_name = serializers.CharField(source='stage.name', read_only=True)
+    assigned_to_name = serializers.CharField(source='assigned_to.username', read_only=True)
+    
+    class Meta:
+        model = ProductionTracking
+        fields = '__all__'
 
 # --- Serializer untuk Order ---
 class OrderSerializer(serializers.ModelSerializer):
-    items = OrderItemSerializer(many=True, required=True) # Bisa tulis nested items
-    # sales_person, customer, status dibaca (read_only=True)
-    sales_person = UserSerializer(read_only=True); customer = CustomerSerializer(read_only=True); status = OrderStatusSerializer(read_only=True)
+    # Gunakan OrderItemSerializer yang sudah diperbaiki
+    items = OrderItemSerializer(many=True, required=True)
+    # Tampilkan detail relasi saat GET
+    sales_person = UserBasicSerializer(read_only=True, allow_null=True)
+    customer = CustomerBasicSerializer(read_only=True)
+    status = OrderStatusBasicSerializer(read_only=True)
+    # Terima ID saat POST/PUT/PATCH
+    customer_id = serializers.PrimaryKeyRelatedField(queryset=Customer.objects.filter(is_active=True), source='customer', write_only=True, label="Customer ID")
+    status_id = serializers.PrimaryKeyRelatedField(queryset=OrderStatus.objects.filter(is_active=True), source='status', write_only=True, label="Status ID")
+    sales_person_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.filter(is_active=True), source='sales_person', write_only=True, allow_null=True, required=False, label="Sales Person ID")
 
-    # customer_id, status_id, sales_person_id untuk ditulis (write_only=True)
-    customer_id = serializers.PrimaryKeyRelatedField(
-        queryset=Customer.objects.filter(is_active=True),
-        source='customer', # Map input customer_id ke field customer instance
-        write_only=True,
-        allow_null=False,
-        label="Customer ID" # Label lebih jelas
-    )
-    status_id = serializers.PrimaryKeyRelatedField(
-        queryset=OrderStatus.objects.filter(is_active=True),
-        source='status', # Map input status_id ke field status instance
-        write_only=True,
-        allow_null=False,
-        label="Status ID" # Label lebih jelas
-    )
-    sales_person_id = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.filter(is_active=True),
-        source='sales_person', # Map input sales_person_id ke field sales_person instance
-        write_only=True,
-        allow_null=True, # Allow null jika '-- TANPA MARKETING --' dipilih
-        required=False, # Tidak wajib diisi
-        label="Sales Person ID" # Label lebih jelas
-    )
+    total = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True, source='calculated_total')
+    production_trackings = ProductionTrackingSerializer(many=True, read_only=True) # Ganti nama field jika perlu
 
     class Meta:
         model = Order
         fields = [
             'id', 'order_number',
-            'customer', 'customer_id', # Input customer_id, Output customer object
-            'sales_person', 'sales_person_id', # Input sales_person_id, Output sales_person object
-            'status', 'status_id', # Input status_id, Output status object
-            'order_date', 'due_date', 'payment_method', 'discount', 'tax', 'shipping_cost', 'notes', 'terms',
-            'is_active', 'sumber_order', 'biaya_pasang', 'biaya_survey', 'total_amount', 'items', 'created_at', 'updated_at'
+            'customer', 'customer_id', # Read & Write ID
+            'sales_person', 'sales_person_id', # Read & Write ID
+            'status', 'status_id', # Read & Write ID
+            'order_date', 'due_date', 'payment_method',
+            'discount', 'tax', 'shipping_cost', 'notes', 'terms', 'is_active',
+            'sumber_order', 'biaya_pasang', 'biaya_survey', 'calculated_total', 'total', # Sertakan 'total'
+            'created_at', 'updated_at', 'items', 'production_trackings', # Ganti nama jika perlu
+            # Field alamat (jika ada di model Order)
+            'alamat_jalan', 'kelurahan', 'kecamatan', 'kota', 'provinsi', 'kode_pos', 'nomor_hp'
         ]
-        # read_only_fields didefinisikan ulang agar tidak menimpa field yang dibutuhkan untuk write_only
-        read_only_fields = [ 'id', 'order_number', 'total_amount', 'created_at', 'updated_at', 'customer', 'sales_person', 'status' ]
+        read_only_fields = [
+            'order_number', 'calculated_total', 'total', 'created_at', 'updated_at',
+            'customer', 'status', 'sales_person', 'production_trackings' # Objek read-only
+        ]
 
     def validate_items(self, value):
         logger.info(f">>> LOGGER INFO OrderSerializer validate_items value received: {value}")
@@ -254,59 +258,71 @@ class OrderSerializer(serializers.ModelSerializer):
         items_data = validated_data.pop('items', [])
         logger.info(f">>> LOGGER INFO OrderSerializer create items_data: {items_data}")
 
-        # validated_data sekarang hanya berisi data untuk model Order itu sendiri
-        # Customer, Status, Sales Person instance sudah di pop dan ada di validated_data
-        # karena source='...' di PrimaryKeyRelatedField
-
         try:
-            # Buat objek Order
+            # Buat objek Order (customer, status, sales_person sudah jadi instance)
             order = Order.objects.create(**validated_data)
             logger.info(f">>> LOGGER INFO OrderSerializer create: Order object created: {order}")
 
-            # Buat objek OrderItem dari items_data
+            # Buat objek OrderItem
             for item_data in items_data:
-                # item_data sudah berisi instance Product karena source='product' di OrderItemSerializer
+                # 'product' instance sudah ada dari product_id di validasi serializer item
                 OrderItem.objects.create(order=order, **item_data)
                 logger.info(f">>> LOGGER INFO OrderSerializer create: OrderItem created: {item_data}")
 
+            # Hitung ulang total setelah item dibuat (jika save() item tidak trigger save() order)
+            order.save(skip_total_calculation=False)
+
         except Exception as e:
             logger.error(f">>> ERROR OrderSerializer create: Failed to create Order or OrderItem: {e}", exc_info=True)
-            # Re-raise exception to signal failure to the viewset
             raise serializers.ValidationError(f"Gagal menyimpan order: {e}")
-
 
         logger.info(">>> LOGGER INFO OrderSerializer create finished successfully.")
         return order
 
     def update(self, instance, validated_data):
-        logger.info(f">>> LOGGER INFO OrderSerializer update validated_data: {validated_data}")
-        items_data = validated_data.pop('items', None)
-        logger.info(f">>> LOGGER INFO OrderSerializer update items_data: {items_data}")
-
-        # Update field pada instance Order
+        logger.info(f">>> LOGGER INFO OrderSerializer update validated_data for instance {instance.id}: {validated_data}")
+        items_data = validated_data.pop('items', None) # Ambil data items jika ada
+        
+        # Handle status update
+        if 'status' in validated_data:
+            status_data = validated_data.pop('status')
+            print(f"Status data received: {status_data}")
+            
+            # Extract status ID (either from dict or directly)
+            status_id = None
+            if isinstance(status_data, dict) and 'id' in status_data:
+                status_id = status_data['id']
+            elif isinstance(status_data, (int, str)):
+                status_id = int(status_data) if str(status_data).isdigit() else None
+                
+            print(f"Status ID extracted: {status_id}")
+            
+            # Update status if ID is valid
+            if status_id is not None:
+                from rumah_akrilik_app.models import OrderStatus
+                try:
+                    status_obj = OrderStatus.objects.get(id=status_id)
+                    instance.status = status_obj
+                    print(f"Status updated to: {status_obj.name} (ID: {status_obj.id})")
+                except OrderStatus.DoesNotExist:
+                    print(f"Status with ID {status_id} not found")
+        
+        # Update remaining fields
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
+            
         instance.save()
-        logger.info(f">>> LOGGER INFO OrderSerializer update: Order instance updated: {instance}")
-
-
-        if items_data is not None:
-            # Hapus item lama dan buat baru jika items_data disediakan
-            try:
-                instance.items.all().delete()
-                logger.info(f">>> LOGGER INFO OrderSerializer update: Deleted existing OrderItems for Order {instance.id}")
-
-                for item_data in items_data:
-                    OrderItem.objects.create(order=instance, **item_data)
-                    logger.info(f">>> LOGGER INFO OrderSerializer update: OrderItem created: {item_data}")
-
-            except Exception as e:
-                logger.error(f">>> ERROR OrderSerializer update: Failed to update OrderItems: {e}", exc_info=True)
-                # Re-raise exception
-                raise serializers.ValidationError(f"Gagal update item order: {e}")
-
-        logger.info(">>> LOGGER INFO OrderSerializer update finished successfully.")
+        print(f"Order saved with status: {instance.status}")
         return instance
+
+# --- Serializer untuk Order List ---
+class OrderListSerializer(serializers.ModelSerializer):
+    customer = CustomerBasicSerializer(read_only=True) # Tampilkan info dasar
+    status = OrderStatusBasicSerializer(read_only=True) # Tampilkan info dasar
+    total = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True, source='calculated_total')
+    class Meta:
+        model = Order
+        fields = ['id', 'order_number', 'customer', 'status', 'total', 'order_date', 'created_at'] # Sesuaikan field
 
 # ======================
 # Production Management
@@ -332,6 +348,19 @@ class ProduksiSerializer(serializers.ModelSerializer):
     order = OrderSerializer(read_only=True)
     order_id = serializers.PrimaryKeyRelatedField( queryset=Order.objects.all(), source='order', write_only=True )
     class Meta: model = Produksi; fields = [ 'id', 'order', 'order_id', 'tahap', 'penanggung_jawab', 'penanggung_jawab_id', 'mulai', 'selesai', 'catatan', 'created_at', 'updated_at' ]; read_only_fields = ['id', 'created_at', 'updated_at', 'order', 'penanggung_jawab']
+
+class ProductionStageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductionStage
+        fields = '__all__'
+
+class ProductionTrackingSerializer(serializers.ModelSerializer):
+    stage_name = serializers.CharField(source='stage.name', read_only=True)
+    assigned_to_name = serializers.CharField(source='assigned_to.username', read_only=True)
+    
+    class Meta:
+        model = ProductionTracking
+        fields = '__all__'
 
 # ======================
 # Marketing

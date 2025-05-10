@@ -5,28 +5,58 @@ from django.conf import settings
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
-    TokenVerifyView, # Pastikan ini diimport
+    TokenVerifyView,
     TokenBlacklistView,
 )
 from django.views.generic import TemplateView
+from django.middleware.csrf import get_token
+from django.http import JsonResponse
 
 # Import views (Pastikan path import ini benar sesuai struktur proyek Anda)
 from .views import (
     UserViewSet, GroupViewSet, RoleViewSet, ProductViewSet, RRVisitStatsView,
     ProductCategoryViewSet, ProductImageViewSet, CustomerViewSet,
-    CustomerAddressViewSet, OrderViewSet, OrderItemViewSet, OrderStatusViewSet,
+    CustomerAddressViewSet, OrderViewSet, OrderStatusViewSet,
     ProduksiViewSet, ProductionJobViewSet, ProductionMaterialViewSet,
     SupplierViewSet, MarketingCampaignViewSet, InventoryViewSet, TransactionViewSet,
     RealisasiKunjunganRRViewSet, AbsensiViewSet, DashboardSummaryView,
-    HealthCheckView, PingView, # VerifyTokenView (Mungkin tidak perlu jika pakai TokenVerifyView standar),
+    HealthCheckView, PingView,
     FileUploadView, UserProfileViewSet,
     MarketingOrderList, RRVisitList, MarketingPerformanceView, SalesDashboardView,
     ProductionStatusView, LowStockAlertView, ProductionScheduleView, InventoryValuationView,
     FileDownloadView, SystemConfigView,
-    CustomAuthToken, # View login kustom Anda
-    UserMeView, UserRegistrationView, # View lain yang mungkin Anda punya
-    test_api, verify_auth # Views test Anda
+    CustomAuthToken,
+    UserMeView, UserRegistrationView,
+    test_api, verify_auth,
+    DashboardStatsView,
+    OrderDailyReportView,
+    OrderMonthlyReportView,
+    ProductionStageViewSet,
+    ProductionTrackingViewSet,
+    update_production_stages,
+    ProductionTrackingByOrderView,
+    check_user_role_access,
+    get_available_roles,
+    basic_login_view,
+    emergency_login,
+    emergency_login_direct,
+    SafeCustomAuthToken,
+    debug_userprofile,
+    repair_userprofile
 )
+
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+
+# Tambahkan fungsi untuk mendapatkan CSRF token
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_csrf_token(request):
+    """
+    Endpoint untuk mendapatkan CSRF token
+    """
+    token = get_token(request)
+    return JsonResponse({'csrfToken': token})
 
 # Initialize router
 router = DefaultRouter()
@@ -47,13 +77,15 @@ router.register('product-images', ProductImageViewSet, basename='productimage')
 router.register('customers', CustomerViewSet, basename='customer')
 router.register('customer-addresses', CustomerAddressViewSet, basename='customeraddress')
 # Order Management
-router.register('order', OrderViewSet, basename='order') # <-- KEMBALIKAN VIEWSET ASLI
-router.register('order-items', OrderItemViewSet, basename='orderitem')
+router.register('order', OrderViewSet, basename='order') # OrderViewSet sudah diregister di sini sebagai 'order'
+# router.register('order-items', OrderItemViewSet, basename='orderitem')
 router.register('order-status', OrderStatusViewSet, basename='orderstatus')
 # Production Management
 router.register('produksi', ProduksiViewSet, basename='produksi')
 router.register('production-jobs', ProductionJobViewSet, basename='productionjob')
 router.register('production-materials', ProductionMaterialViewSet, basename='productionmaterial')
+router.register('production-stages', ProductionStageViewSet) # ProductionStageViewSet sudah diregister di sini
+router.register('production-tracking', ProductionTrackingViewSet)
 # Inventory Management
 router.register('inventory', InventoryViewSet, basename='inventory')
 router.register('transactions', TransactionViewSet, basename='transaction')
@@ -63,6 +95,8 @@ router.register('rr-visits', RealisasiKunjunganRRViewSet, basename='rrvisit')
 router.register('marketing-campaigns', MarketingCampaignViewSet, basename='marketingcampaign')
 # Attendance
 router.register('attendance', AbsensiViewSet, basename='attendance')
+# Dashboard
+
 
 # ======================
 # URL PATTERNS (Relative to /api/)
@@ -71,23 +105,14 @@ urlpatterns = [
     # Include URLs from the router
     path('', include(router.urls)),
 
-    path('simple-test/', simple_test_view, name='simple-test'),
-    # Authentication API (relative path from /api/)
-    # Frontend expects /api/auth/login/ and /api/auth/token/verify/
+    # Sederhanakan endpoint auth
     path('auth/', include([
-        path('login/', CustomAuthToken.as_view(), name='api-login'), # Menggunakan view kustom Anda
-        # Jika CustomAuthToken tidak menangani refresh/verify, gunakan standar:
-        # path('token/', TokenObtainPairView.as_view(), name='token-obtain-pair'), # Jika login pakai standar JWT
+        path('login/', CustomAuthToken.as_view(), name='api-login'),
         path('token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
-        path('token/verify/', TokenVerifyView.as_view(), name='token-verify'), # Path yang dicari frontend
-        path('token/blacklist/', TokenBlacklistView.as_view(), name='token-blacklist'),
-        path('me/', UserMeView.as_view(), name='current-user'),
-        path('register/', UserRegistrationView.as_view(), name='user-register'),
-        # path('password-reset/', include('django_rest_passwordreset.urls', namespace='password_reset')), # Uncomment jika pakai reset password
+        path('token/verify/', TokenVerifyView.as_view(), name='token-verify'),
+        # Simpan endpoint emergency untuk berjaga-jaga
+        path('emergency-login/', emergency_login_direct, name='emergency-login'),
     ])),
-
-    # Sertakan URL dari api/urls.py (jika masih diperlukan, relative to /api/)
-    path('misc/', include('api.urls')), # Contoh: /api/misc/test/
 
     # Marketing (relative path from /api/)
     path('marketing/orders/', MarketingOrderList.as_view(), name='marketing-orders'),
@@ -98,6 +123,22 @@ urlpatterns = [
     # Production (relative path from /api/)
     path('production/status/<int:pk>/', ProductionStatusView.as_view(), name='production-status'),
     path('production/schedule/', ProductionScheduleView.as_view(), name='production-schedule'),
+    
+    # === URL BARU DAN YANG DISESUAIKAN UNTUK PRODUCTION TRACKING & ORDERS ===
+    # Path 'production-tracking/update/' sudah ada, pastikan `update_production_stages` terimpor dengan benar.
+    # Jika belum ada atau ingin dikelompokkan:
+    path('production-tracking/update/', update_production_stages, name='update_production_stages_explicit'), # Name diubah sedikit jika yang lama tetap, atau hapus yang duplikat
+    path('production-tracking/by-order/<int:order_id>/', ProductionTrackingByOrderView.as_view(), name='production-tracking-by-order'),
+    
+    # Path 'production-stages/' untuk list (jika router.register belum mencukupi atau nama spesifik diperlukan)
+    # Perhatikan: router.register('production-stages', ProductionStageViewSet) sudah ada di atas.
+    # Path ini akan spesifik untuk 'get: list' dan mungkin berguna jika ingin nama URL yang berbeda dari router.
+    path('production-stages/list/', ProductionStageViewSet.as_view({'get': 'list'}), name='production-stages-list'), # Mengubah path sedikit agar tidak sama persis dengan root dari router
+
+    # Path untuk OrderViewSet dengan prefix 'orders/' (berbeda dari 'order/' yang diregister router)
+    path('orders/', OrderViewSet.as_view({'get': 'list', 'post': 'create'}), name='api-order-list'),
+    path('orders/<int:pk>/', OrderViewSet.as_view({'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}), name='api-order-detail'),
+    # =======================================================================
 
     # Inventory (relative path from /api/)
     path('inventory/low-stock/', LowStockAlertView.as_view(), name='low-stock'),
@@ -106,6 +147,8 @@ urlpatterns = [
     # Dashboard (relative path from /api/)
     path('dashboard/summary/', DashboardSummaryView.as_view(), name='dashboard-summary'),
     path('dashboard/sales/', SalesDashboardView.as_view(), name='sales-dashboard'),
+    path('dashboard/stats/', DashboardStatsView.as_view(), name='dashboard-stats'),
+    # path('dashboard/', DashboardStatsView.as_view(), name='dashboard'),
 
     # File Handling (relative path from /api/)
     path('files/upload/', FileUploadView.as_view(), name='file-upload'),
@@ -115,17 +158,35 @@ urlpatterns = [
     path('system/health/', HealthCheckView.as_view(), name='health-check'),
     path('system/ping/', PingView.as_view(), name='ping'),
     path('system/config/', SystemConfigView.as_view(), name='system-config'),
+    path('system/debug-userprofile/', debug_userprofile, name='debug-userprofile'),
+    path('system/repair-userprofile/', repair_userprofile, name='repair-userprofile'),
 
     # Test paths (relative path from /api/)
     path('test/', test_api, name='test_api'),
-    path('verify/', verify_auth, name='verify_auth'), # Path ini mungkin bentrok dengan auth/token/verify/
+    path('verify/', verify_auth, name='verify_auth'),
 
     # Swagger Docs (jika Anda ingin menampilkannya di /api/docs/)
-    # path('docs/', TemplateView.as_view(template_name='swagger.html'), name='api-docs'), # Harus disesuaikan
+    # path('docs/', TemplateView.as_view(template_name='swagger.html'), name='api-docs'),
+
+    # Add this line for daily order report
+    path('order/report/daily/', OrderDailyReportView.as_view(), name='order-daily-report'),
+
+    # Add this line for monthly order report
+    path('order/report/monthly/', OrderMonthlyReportView.as_view(), name='order-monthly-report'),
+
+    # Add this line for debug order create
+    path('debug/order/', OrderViewSet.as_view({'post': 'create'}), name='debug-order-create'),
+
+    # Add health check endpoint
+    path('health/', simple_test_view, name='api-health'),
+
+    # User role endpoints
+    path('user/check-role/<str:role_name>/', check_user_role_access, name='check-user-role'),
+    path('roles/available/', get_available_roles, name='get-available-roles'),
 ]
 
-# Error handlers (sudah didefinisikan di settings.py)
-handler400 = 'rumah_akrilik_app.views.bad_request'
-handler403 = 'rumah_akrilik_app.views.permission_denied'
-handler404 = 'rumah_akrilik_app.views.page_not_found'
-handler500 = 'rumah_akrilik_app.views.server_error'
+# Error handlers (sudah didefinisikan di settings.py atau di root urls.py)
+# handler400 = 'rumah_akrilik_app.views.bad_request'
+# handler403 = 'rumah_akrilik_app.views.permission_denied'
+# handler404 = 'rumah_akrilik_app.views.page_not_found'
+# handler500 = 'rumah_akrilik_app.views.server_error'
