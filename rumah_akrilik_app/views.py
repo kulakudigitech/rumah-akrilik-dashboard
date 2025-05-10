@@ -36,6 +36,7 @@ from rest_framework.pagination import PageNumberPagination
 import socket
 import logging
 import traceback
+from django.core.exceptions import ObjectDoesNotExist
 
 # --- Import Models ---
 from .models import (
@@ -761,6 +762,67 @@ class OrderStatusViewSet(viewsets.ModelViewSet):
     serializer_class = OrderStatusSerializer
     permission_classes = [IsAuthenticated]
 
+class UpdateOrderStatusView(APIView):
+    """
+    View untuk mengupdate status order berdasarkan progress produksi
+    """
+    # Ubah permission class untuk debugging
+    # permission_classes = [IsAuthenticated]  # Komentar ini dulu
+    permission_classes = [AllowAny]  # Gunakan ini untuk debugging
+    
+    def post(self, request, order_id, format=None):
+        try:
+            # Tambahkan log debugging
+            print(f"Received request to update status for order {order_id}")
+            print(f"Request user: {request.user}")
+            print(f"Request data: {request.data}")
+            
+            # Cari order berdasarkan ID
+            order = Order.objects.get(id=order_id)
+            print(f"Found order: {order}")
+            
+            # Cek jika production tracking sudah 100% selesai
+            production_trackings = ProductionTracking.objects.filter(order=order)
+            all_completed = all(track.status == 'completed' for track in production_trackings)
+            print(f"All stages completed: {all_completed}")
+            
+            if all_completed:
+                # Ambil status 'Selesai'
+                try:
+                    status_selesai = OrderStatus.objects.get(name__iexact='Selesai')
+                except OrderStatus.DoesNotExist:
+                    # Jika status 'Selesai' tidak ada, buat baru
+                    status_selesai = OrderStatus.objects.create(name='Selesai', is_active=True)
+                
+                # Update status order menjadi 'Selesai'
+                order.status = status_selesai
+                order.save()
+                print(f"Order status updated to: {status_selesai.name}")
+                
+                return Response({
+                    'success': True,
+                    'message': f'Order #{order.order_number} berhasil diupdate menjadi "Selesai"'
+                })
+            else:
+                return Response({
+                    'success': False,
+                    'message': 'Semua tahap produksi belum selesai'
+                }, status=status.HTTP_400_BAD_REQUEST)
+                
+        except Order.DoesNotExist:
+            return Response({
+                'success': False,
+                'message': f'Order dengan ID {order_id} tidak ditemukan'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            print(f"Error updating order status: {str(e)}")
+            import traceback
+            print(traceback.format_exc())
+            return Response({
+                'success': False, 
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 # ======================
 # Production Views
 # ======================
@@ -900,96 +962,189 @@ class ProductionTrackingViewSet(viewsets.ModelViewSet):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def update_production_stages(request):
-    """Update multiple production tracking stages at once"""
+    """
+    Update status tahapan produksi dan secara otomatis perbarui status order jika semua tahap selesai
+    """
+    print("update_production_stages called")
     try:
-        order_id = request.data.get('order')
-        stages_data = request.data.get('stages', {})
-        notes = request.data.get('notes')
+        data = request.data
+        print(f"Request data: {data}")
+        
+        order_id = data.get('order_id')
+        stages = data.get('stages', [])
         
         if not order_id:
-            return Response({"error": "Order ID is required"}, status=400)
+            print("Missing order_id")
+            return Response({'error': 'Missing order_id'}, status=400)
+        
+        print(f"Looking for order with ID: {order_id}")
+        order = Order.objects.get(id=order_id)
+        print(f"Found order: {order.order_number}")
+        
+        print(f"Getting production trackings for order {order_id}")
+        production_trackings = ProductionTracking.objects.filter(order=order)
+        print(f"Found {production_trackings.count()} production trackings")
+        
+        # Update status untuk setiap tahap
+        for stage in stages:
+            stage_id = stage.get('id')
+            status = stage.get('status')
+            print(f"Updating stage {stage_id} to status: {status}")
             
-        try:
-            order = Order.objects.get(id=order_id)
-        except Order.DoesNotExist:
-            return Response({"error": f"Order with ID {order_id} not found"}, status=404)
-        
-        # Update or create general production notes entry
-        if notes:
-            ProductionTracking.objects.update_or_create(
-                order=order,
-                stage=None,
-                defaults={'notes': notes, 'status': 'pending'}
-            )
-        
-        # Process each stage update
-        results = []
-        for stage_id_str, status in stages_data.items():
             try:
-                # Convert stage_id to int explicitly
-                stage_id = int(stage_id_str)
-                
-                # Check if stage exists before querying
-                try:
-                    stage = ProductionStage.objects.get(id=stage_id)
-                except ProductionStage.DoesNotExist:
-                    results.append({
-                        'stage_id': stage_id,
-                        'error': f"Stage with ID {stage_id} not found"
-                    })
-                    continue
-
-                # The key fix: Use update_or_create instead of get_or_create to prevent "no match" errors
-                tracking, created = ProductionTracking.objects.update_or_create(
-                    order=order,
-                    stage=stage,
-                    defaults={'status': status}
-                )
-                
-                # If moving to completed, set end_time
-                if status == 'completed':
-                    tracking.end_time = timezone.now()
-                    tracking.save()
-                
-                results.append({
-                    'stage_id': stage.id,
-                    'stage_name': stage.name,
-                    'status': status,
-                    'created': created
-                })
-            except Exception as e:
-                import traceback
-                traceback.print_exc()
-                results.append({
-                    'stage_id': stage_id_str,
-                    'error': str(e)
-                })
+                track = production_trackings.get(stage_id=stage_id)
+                track.status = status
+                track.save()
+                print(f"Updated stage {stage_id}, saved")
+            except ProductionTracking.DoesNotExist:
+                print(f"Stage {stage_id} not found for order {order_id}")
+                return Response({'error': f'Stage {stage_id} not found'}, status=404)
         
-        # Continue with the rest of the function as is
-        # Check if all stages are completed to update order status
-        all_tracking = ProductionTracking.objects.filter(
-            order=order, 
-            stage__isnull=False  # Exclude general notes entries
-        )
-        all_stages = ProductionStage.objects.filter(is_active=True)
+        # Periksa apakah semua tahap sudah selesai
+        all_completed = all(track.status == 'completed' for track in production_trackings)
+        print(f"All stages completed: {all_completed}")
         
-        if (all_tracking.count() >= all_stages.count() and 
-            all_tracking.filter(status='completed').count() == all_stages.count()):
-            # All stages completed, update order status to 'Siap Kirim'
-            ready_status = OrderStatus.objects.filter(name__icontains='siap kirim').first()
-            if ready_status:
-                order.status = ready_status
-                order.save()
+        # Jika semua tahap selesai, update status order menjadi 'Selesai'
+        if all_completed:
+            try:
+                print("Looking for status 'Selesai'")
+                status_selesai = OrderStatus.objects.get(name__iexact='Selesai')
+                print(f"Found status: {status_selesai.name}")
+            except OrderStatus.DoesNotExist:
+                print("Status 'Selesai' not found, creating")
+                status_selesai = OrderStatus.objects.create(name='Selesai', is_active=True)
+                print(f"Created status: {status_selesai.name}")
+            
+            print(f"Updating order {order.order_number} status to {status_selesai.name}")
+            order.status = status_selesai
+            order.save()
+            print("Order status updated and saved")
         
         return Response({
-            'order_id': order_id,
-            'updated': True,
-            'results': results
+            'success': True,
+            'message': 'Tahapan produksi berhasil diupdate',
+            'all_completed': all_completed
         })
+    except Order.DoesNotExist:
+        print(f"Order with ID {order_id} not found")
+        return Response({'error': 'Order tidak ditemukan'}, status=404)
     except Exception as e:
         import traceback
-        traceback.print_exc()
-        return Response({"error": str(e)}, status=500)
+        print(f"Error in update_production_stages: {str(e)}")
+        print(traceback.format_exc())  # Print stack trace
+        return Response({'error': str(e)}, status=500)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def claim_production_task(request, tracking_id):
+    try:
+        # Ambil tracking record
+        tracking = ProductionTracking.objects.get(id=tracking_id)
+        
+        # Periksa status saat ini
+        if tracking.status != 'pending':
+            return Response({
+                'success': False,
+                'message': f'Task sudah dalam status {tracking.status}'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Perbarui status dan assign ke user saat ini
+        tracking.status = 'in_progress'
+        tracking.assigned_to = request.user
+        tracking.save()
+        
+        # Kirim notifikasi jika perlu
+        try:
+            # Kode untuk notifikasi (opsional)
+            pass
+        except Exception as notify_error:
+            print(f"Error sending notification: {str(notify_error)}")
+        
+        return Response({
+            'success': True,
+            'message': 'Task berhasil diklaim'
+        })
+    except ProductionTracking.DoesNotExist:
+        return Response({
+            'success': False,
+            'message': 'Task tidak ditemukan'
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        print(f"Error claiming production task: {str(e)}")
+        print(traceback.format_exc())  # Print stack trace
+        return Response({
+            'success': False,
+            'message': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_available_tasks_by_stage(request):
+    """
+    Get available production tasks by stage
+    """
+    try:
+        # Ambil parameter stage dari query string
+        stages = request.query_params.getlist('stage', [])
+        status_filter = request.query_params.get('status', 'pending')
+        
+        if not stages:
+            return Response({
+                'success': False,
+                'message': 'Parameter stage diperlukan'
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
+        # Convert to integers
+        try:
+            stage_ids = [int(s) for s in stages]
+        except ValueError:
+            return Response({
+                'success': False,
+                'message': 'Stage ID harus berupa angka'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Query tasks by stage and status
+        tasks = ProductionTracking.objects.filter(
+            stage_id__in=stage_ids,
+            status=status_filter,
+            assigned_to=None  # Only unassigned tasks
+        ).select_related('order', 'stage')
+        
+        # Serialize tasks
+        serializer = ProductionTrackingSerializer(tasks, many=True)
+        return Response(serializer.data)
+        
+    except Exception as e:
+        print(f"Error getting available tasks: {str(e)}")
+        print(traceback.format_exc())
+        return Response({
+            'success': False,
+            'message': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_my_production_assignments(request):
+    """
+    Get production tasks assigned to the current user
+    """
+    try:
+        # Query tasks assigned to current user
+        tasks = ProductionTracking.objects.filter(
+            assigned_to=request.user
+        ).select_related('order', 'stage')
+        
+        # Serialize tasks
+        serializer = ProductionTrackingSerializer(tasks, many=True)
+        return Response(serializer.data)
+        
+    except Exception as e:
+        print(f"Error getting user assignments: {str(e)}")
+        print(traceback.format_exc())
+        return Response({
+            'success': False,
+            'message': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # ======================
 # Inventory & Supplier Views
@@ -1191,28 +1346,103 @@ class DashboardStatsView(APIView):
     
     def get(self, request, format=None):
         try:
+            # Tambahkan logging detail untuk troubleshooting
+            print("DashboardStatsView: Request received")
+            
             # Dapatkan parameter tahun jika ada
             year = request.query_params.get('year', datetime.now().year)
+            try:
+                year = int(year)
+                print(f"Using year: {year}")
+            except (TypeError, ValueError):
+                year = datetime.now().year
+                print(f"Invalid year, using current year: {year}")
+
+            # Gunakan try/except terpisah untuk tiap operasi database
+            # untuk mempermudah identifikasi error
+            try:
+                # Ambil semua orders untuk kalkulasi
+                orders = Order.objects.select_related('customer', 'status').prefetch_related('items')
+                print(f"Retrieved {orders.count()} orders")
+                
+                # Hitung order berdasarkan status (handle status None)
+                order_baru = orders.filter(status__name__icontains='baru').count()
+                order_proses = orders.filter(
+                    status__name__icontains='produksi'
+                ).count() + orders.filter(status__name__icontains='proses').count()
+                
+                # Hati-hati dengan filter yang menggunakan __icontains jika status bisa None
+                order_selesai = orders.filter(
+                    status__name__icontains='selesai'
+                ).count()
+                
+                print(f"Status counts - baru: {order_baru}, proses: {order_proses}, selesai: {order_selesai}")
+            except Exception as e:
+                print(f"Error getting order counts: {str(e)}")
+                # Fallback ke nilai default jika ada error
+                order_baru = 0
+                order_proses = 0
+                order_selesai = 0
+
+            # Total semua orders
+            total_orders = orders.count()
+            print(f"Total orders: {total_orders}")
             
-            # Ambil data order berdasarkan status
-            order_baru = Order.objects.filter(status__name__icontains='baru').count()
-            order_proses = Order.objects.filter(status__name__icontains='proses').count()
-            order_selesai = Order.objects.filter(status__name__icontains='selesai').count()
+            # Pending orders = baru + proses
+            pending_orders = order_baru + order_proses
             
-            # Hitung pendapatan bulan ini
-            today = timezone.now()
-            first_day_of_month = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-            last_day_of_month = (first_day_of_month + timedelta(days=32)).replace(day=1) - timedelta(seconds=1)
+            # Completed orders = selesai
+            completed_orders = order_selesai
             
-            pendapatan_bulan_ini = Order.objects.filter(
-                order_date__gte=first_day_of_month,
-                order_date__lte=last_day_of_month,
-                status__name__icontains='selesai'
-            ).aggregate(total=Sum('total'))['total'] or 0
+            # Kalkulasi total pendapatan dengan error handling yang lebih baik
+            total_revenue = 0
+            try:
+                for order in orders:
+                    if hasattr(order, 'calculated_total') and order.calculated_total:
+                        try:
+                            total_revenue += float(order.calculated_total)
+                        except (ValueError, TypeError):
+                            pass
+                    elif hasattr(order, 'total') and order.total:
+                        try:
+                            total_revenue += float(order.total)
+                        except (ValueError, TypeError):
+                            pass
+                print(f"Total revenue calculated: {total_revenue}")
+            except Exception as e:
+                print(f"Error calculating revenue: {str(e)}")
+
+            # Return response dengan format yang konsisten
+            response_data = {
+                "totalOrders": total_orders,
+                "pendingOrders": pending_orders,
+                "completedOrders": completed_orders,
+                "totalRevenue": total_revenue,
+                "orderStatusDistribution": [
+                    {"name": "Baru", "value": order_baru},
+                    {"name": "Produksi", "value": order_proses},
+                    {"name": "Selesai", "value": order_selesai}
+                ],
+                "monthlyRevenue": self.get_monthly_revenue(orders, year),
+                "recentOrders": self.get_recent_orders(orders)
+            }
             
-            # Ambil data penjualan bulanan untuk tahun yang dipilih
-            monthly_sales = []
-            months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
+            print("Dashboard stats generated successfully")
+            return Response(response_data)
+            
+        except Exception as e:
+            import traceback
+            print(f"Error generating dashboard stats: {str(e)}")
+            print(traceback.format_exc())  # Print stack trace untuk debugging
+            return Response(
+                {"error": f"Failed to generate dashboard stats: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def get_monthly_revenue(self, orders, year):
+        try:
+            months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+            monthly_revenue = []
             
             for month in range(1, 13):
                 first_day = datetime(int(year), month, 1)
@@ -1221,55 +1451,54 @@ class DashboardStatsView(APIView):
                 else:
                     last_day = datetime(int(year), month + 1, 1) - timedelta(days=1)
                 
-                monthly_total = Order.objects.filter(
-                    order_date__gte=first_day,
-                    order_date__lte=last_day,
-                    status__name__icontains='selesai'
-                ).aggregate(total=Sum('total'))['total'] or 0
+                monthly_total = 0
+                try:
+                    month_orders = orders.filter(order_date__gte=first_day, order_date__lte=last_day)
+                    
+                    for order in month_orders:
+                        if hasattr(order, 'calculated_total') and order.calculated_total:
+                            try:
+                                monthly_total += float(order.calculated_total)
+                            except (ValueError, TypeError):
+                                pass
+                        elif hasattr(order, 'total') and order.total:
+                            try:
+                                monthly_total += float(order.total)
+                            except (ValueError, TypeError):
+                                pass
+                except Exception as e:
+                    print(f"Error calculating month {month} revenue: {str(e)}")
                 
-                monthly_sales.append({
+                monthly_revenue.append({
                     'month': months[month - 1],
                     'amount': monthly_total
                 })
-            
-            # Ambil top 5 produk terlaris
-            top_products = []
-            
-            # Ambil data dari OrderItem (jika model OrderItem tersedia)
-            if 'OrderItem' in globals():
-                top_products_data = OrderItem.objects.values('product__name') \
-                    .annotate(count=Count('id')) \
-                    .order_by('-count')[:5]
-                
-                top_products = [
-                    {'product_name': item['product__name'], 'count': item['count']}
-                    for item in top_products_data
-                ]
-            else:
-                # Fallback jika tidak ada model OrderItem
-                top_products = [
-                    {"product_name": "Neonbox 30x40", "count": 12},
-                    {"product_name": "Akrilik Stand", "count": 8},
-                    {"product_name": "Neon Sign", "count": 6},
-                    {"product_name": "Trophy Akrilik", "count": 5},
-                    {"product_name": "Signage", "count": 4}
-                ]
-            
-            return Response({
-                "order_baru": order_baru,
-                "order_proses": order_proses,
-                "order_selesai": order_selesai,
-                "pendapatan_bulan_ini": pendapatan_bulan_ini,
-                "monthly_sales": monthly_sales,
-                "top_products": top_products
-            })
-            
+            return monthly_revenue
         except Exception as e:
-            logger.exception(f"Error generating dashboard stats: {str(e)}")
-            return Response(
-                {"error": f"Failed to generate dashboard stats: {str(e)}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            print(f"Error in get_monthly_revenue: {str(e)}")
+            return []
+
+    def get_recent_orders(self, orders):
+        try:
+            recent_orders = []
+            recent_orders_queryset = orders.order_by('-created_at')[:5]
+            
+            for order in recent_orders_queryset:
+                try:
+                    recent_orders.append({
+                        'id': order.id,
+                        'order_number': order.order_number,
+                        'customer_name': order.customer.name if order.customer else 'Unknown',
+                        'date': order.order_date.isoformat() if order.order_date else None,
+                        'total': float(order.calculated_total or order.total or 0),
+                        'status': order.status.name if order.status else 'Unknown'
+                    })
+                except Exception as order_e:
+                    print(f"Error processing order {getattr(order, 'id', 'unknown')}: {str(order_e)}")
+            return recent_orders
+        except Exception as e:
+            print(f"Error in get_recent_orders: {str(e)}")
+            return []
 
 class DashboardStatsViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]

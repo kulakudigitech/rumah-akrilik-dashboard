@@ -42,11 +42,16 @@ from .views import (
     emergency_login_direct,
     SafeCustomAuthToken,
     debug_userprofile,
-    repair_userprofile
+    repair_userprofile,
+    UpdateOrderStatusView, # Pastikan UpdateOrderStatusView sudah diimpor
+    get_available_tasks_by_stage, # Pastikan get_available_tasks_by_stage sudah diimpor
+    get_my_production_assignments, # Pastikan get_my_production_assignments sudah diimpor
+    claim_production_task
 )
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
+from .debug_api import test_database_connection, test_order_status, test_production_tracking, test_environment
 
 # Tambahkan fungsi untuk mendapatkan CSRF token
 @api_view(['GET'])
@@ -129,6 +134,9 @@ urlpatterns = [
     # Jika belum ada atau ingin dikelompokkan:
     path('production-tracking/update/', update_production_stages, name='update_production_stages_explicit'), # Name diubah sedikit jika yang lama tetap, atau hapus yang duplikat
     path('production-tracking/by-order/<int:order_id>/', ProductionTrackingByOrderView.as_view(), name='production-tracking-by-order'),
+    path('production-tracking/<int:tracking_id>/claim/', claim_production_task, name='claim_production_task'),
+    path('production-tracking/by-stage/', get_available_tasks_by_stage, name='get-available-tasks-by-stage'),
+    path('production-tracking/my-assignments/', get_my_production_assignments, name='get-my-production-assignments'),
     
     # Path 'production-stages/' untuk list (jika router.register belum mencukupi atau nama spesifik diperlukan)
     # Perhatikan: router.register('production-stages', ProductionStageViewSet) sudah ada di atas.
@@ -138,6 +146,7 @@ urlpatterns = [
     # Path untuk OrderViewSet dengan prefix 'orders/' (berbeda dari 'order/' yang diregister router)
     path('orders/', OrderViewSet.as_view({'get': 'list', 'post': 'create'}), name='api-order-list'),
     path('orders/<int:pk>/', OrderViewSet.as_view({'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}), name='api-order-detail'),
+    path('orders/<int:order_id>/update-status/', UpdateOrderStatusView.as_view(), name='update-order-status'),
     # =======================================================================
 
     # Inventory (relative path from /api/)
@@ -180,9 +189,18 @@ urlpatterns = [
     # Add health check endpoint
     path('health/', simple_test_view, name='api-health'),
 
+    # debug api
+    path('debug/db/', test_database_connection, name='test-database'),
+    path('debug/order-status/', test_order_status, name='test-order-status'),
+    path('debug/production-tracking/', test_production_tracking, name='test-production-tracking'),
+    path('debug/environment/', test_environment, name='test-environment'),
+
     # User role endpoints
     path('user/check-role/<str:role_name>/', check_user_role_access, name='check-user-role'),
     path('roles/available/', get_available_roles, name='get-available-roles'),
+
+    # Tambahkan di urlpatterns
+    path('debug/update-order-status/<int:order_id>/', UpdateOrderStatusView.as_view(), name='debug-update-order-status'),
 ]
 
 # Error handlers (sudah didefinisikan di settings.py atau di root urls.py)
