@@ -1,0 +1,225 @@
+.main-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.header-dashboard {
+  background-color: #4a5af8;
+  color: white;
+  padding: 0 20px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  z-index: 1001;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.content-area {
+  display: flex;
+  flex: 1;
+  position: relative;
+  margin-top: 60px; /* Add margin to account for fixed header */
+  height: calc(100vh - 60px); /* Adjust height to account for fixed header */
+}
+
+.main-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  background-color: #f7fafc;
+}
+
+.btn-logout {
+  background-color: rgba(255,255,255,0.2);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 15px;
+}
+
+.btn-logout:hover {
+  background-color: rgba(255,255,255,0.3);
+}
+
+/* Styling tambahan untuk elemen yang menggunakan kelas Bootstrap */
+
+header.bg-primary {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.bg-dark.text-white {
+  box-shadow: 1px 0 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Styling untuk header dan layout umum */
+.bg-primary {
+  background-color: #3498db !important;
+}
+
+/* Styling untuk sidebar */
+.bg-dark {
+  background-color: #2c3e50 !important;
+}
+
+.nav-item {
+  width: 100%;
+  overflow: visible !important; 
+}
+
+.nav-item ul {
+  overflow: visible !important;
+}
+
+/* Styling untuk menu sidebar */
+.nav-link {
+  transition: all 0.3s;
+  color: white !important;
+}
+
+.nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.bg-secondary.bg-opacity-25 .nav-link {
+  border-left: 3px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.bg-secondary.bg-opacity-25 .nav-link:hover {
+  border-left-color: #4a5af8;
+}
+
+.bg-secondary.bg-opacity-25 .nav-link.active {
+  border-left-color: #4a5af8;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Styling khusus untuk menu dan submenu */
+.submenu {
+  display: block;
+  width: 100%;
+  padding-left: 0;
+}
+
+.submenu .nav-link {
+  padding-left: 2.5rem !important;
+  font-size: 0.9rem;
+}
+
+/* Active state styling */
+.nav-link.active {
+  background-color: rgba(52, 152, 219, 0.5);
+  border-left: 4px solid #3498db;
+}
+
+/* Animasi untuk dropdown */
+.dropdown-show {
+  animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Tambahkan gaya untuk submenu dropdown */
+.dropdown-show {
+  display: block !important;
+  background-color: rgba(0, 0, 0, 0.2) !important;
+  padding: 0;
+  margin: 0;
+}
+
+.dropdown-show .nav-link {
+  padding-left: 2.5rem !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.dropdown-show .nav-link:hover {
+  color: white !important;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Styling untuk dropdown header */
+.dropdown-header {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  color: white;
+  background-color: transparent;
+  transition: background-color 0.2s;
+}
+
+.dropdown-header:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Untuk mengatasi masalah warna teks */
+.text-white {
+  color: white !important;
+}
+
+/* Hapus atau komentari bagian ini karena menyebabkan dropdown tertutup */
+/* 
+.nav-item .nav.flex-column {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out;
+}
+
+.nav-item .nav.flex-column.show {
+  max-height: 200px;
+}
+*/
+
+/* Sidebar styling */
+.sidebar-container {
+  width: 250px;
+  height: calc(100vh - 60px);
+  position: fixed;
+  left: 0;
+  top: 60px; /* Position below the fixed header */
+  overflow-y: auto;
+  z-index: 1000;
+  background-color: #2d3748;
+}
+
+/* Main content styling */
+.content-container {
+  margin-left: 250px;
+  width: calc(100% - 250px);
+  padding: 20px;
+  flex: 1;
+  overflow-y: auto;
+  background-color: #f7fafc;
+}
+
+/* Responsive layout */
+@media (max-width: 992px) {
+  .sidebar-container {
+    width: 100%;
+    position: relative;
+    top: 0;
+    height: auto;
+    z-index: 998;
+  }
+  
+  .content-container {
+    margin-left: 0;
+    width: 100%;
+  }
+  
+  .content-area {
+    flex-direction: column;
+  }
+}

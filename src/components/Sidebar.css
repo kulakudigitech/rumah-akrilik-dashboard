@@ -1,0 +1,152 @@
+.sidebar {
+  width: 250px;
+  background-color: #2d3748;
+  color: white;
+  height: calc(100vh - 60px);
+  overflow-y: auto;
+}
+
+.sidebar-header {
+  padding: 16px;
+  background-color: rgba(0,0,0,0.2);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.nav-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-item {
+  display: block;
+  position: relative;
+}
+
+.nav-link {
+  display: block;
+  padding: 12px 16px;
+  color: rgba(255,255,255,0.7);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.nav-link:hover {
+  color: white;
+  background-color: rgba(255,255,255,0.05);
+}
+
+.dropdown-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dropdown-toggle::after {
+  content: "?";
+  font-size: 0.6rem;
+  transition: transform 0.3s;
+}
+
+.dropdown-toggle.expanded::after {
+  transform: rotate(180deg);
+}
+
+.dropdown-menu {
+  list-style: none;
+  padding: 0;
+  background-color: rgba(0,0,0,0.2);
+  overflow: hidden;
+}
+
+.dropdown-item {
+  display: block;
+  padding: 10px 16px 10px 32px;
+  color: rgba(255,255,255,0.6);
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.dropdown-item:hover {
+  background-color: rgba(255,255,255,0.05);
+  color: white;
+}
+
+.menu {
+  width: 100%;
+  height: 100%;
+  background-color: #2c3e50;
+  color: #fff;
+}
+
+.menu-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu-list li {
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.menu-list li a, 
+.menu-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 15px;
+  color: #ecf0f1;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.menu-list li a:hover,
+.menu-header:hover {
+  background-color: rgba(255,255,255,0.1);
+  cursor: pointer;
+}
+
+.menu-list li a.active {
+  background-color: #3498db;
+  color: #fff;
+}
+
+.menu-list li a svg,
+.menu-header svg {
+  margin-right: 10px;
+  font-size: 16px;
+}
+
+.menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.menu-header > div {
+  display: flex;
+  align-items: center;
+}
+
+.caret-icon {
+  font-size: 14px;
+}
+
+.submenu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background-color: rgba(0,0,0,0.2);
+}
+
+.submenu li a {
+  padding-left: 40px;
+}

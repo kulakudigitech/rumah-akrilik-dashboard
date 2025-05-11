@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rumah Akrilik - Sedang Dalam Perbaikan</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 40px 20px;
+            margin: 0;
+            background-color: #f7f9fc;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        .error-code {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .actions {
+            margin-top: 30px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 5px;
+        }
+        .contact {
+            margin-top: 30px;
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Rumah Akrilik</h1>
+        <p class="error-code">Sistem sedang dalam perbaikan</p>
+        <p>Mohon maaf atas ketidaknyamanannya. Tim teknis kami sedang bekerja untuk menyelesaikan masalah ini.</p>
+        <p>Tanggal: <span id="current-date"></span></p>
+        <div class="actions">
+            <a href="/" class="btn">Coba Refresh</a>
+            <a href="/admin/" class="btn">Login Admin</a>
+        </div>
+        <div class="contact">
+            <p>Hubungi admin: admin@rumahakrilik.id</p>
+        </div>
+    </div>
+    <script>
+        document.getElementById('current-date').textContent = new Date().toLocaleDateString('id-ID');
+    </script>
+</body>
+</html>
