@@ -3,7 +3,7 @@ import { Card, Row, Col, Table, Badge, Button, Form } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
     faShoppingCart, faUsers, faMoneyBillWave, faChartLine, 
-    faUserPlus, faMapMarkerAlt, faBullhorn // gunakan faBullhorn sebagai pengganti faMegaphone
+    faUserPlus, faMapMarkerAlt, faBullhorn
   } from '@fortawesome/free-solid-svg-icons';
 import { Line, Doughnut, Bar } from 'react-chartjs-2';
 import { formatCurrency } from '../../utils/formatters';
