@@ -3,7 +3,8 @@ import { Link, NavLink, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faTachometerAlt, faShoppingCart, faUsers, faIndustry, faMoneyBill,
-  faChartLine, faBell, faTools, faCaretDown, faCaretRight
+  faChartLine, faBell, faTools, faCaretDown, faCaretRight, faListCheck,
+  faClipboardList, faUser, faSignOutAlt, faClipboardCheck, faListAlt
 } from '@fortawesome/free-solid-svg-icons';
 import './Sidebar.css';
 
@@ -71,6 +72,7 @@ const Sidebar = () => {
   const renderMenuItems = () => {
     // Ambil user roles dari localStorage dengan normalisasi
     const userRolesStr = localStorage.getItem('userRoles');
+    const username = localStorage.getItem('username');
     let userRoles = [];
     
     // Handle berbagai format role di localStorage
@@ -104,6 +106,64 @@ const Sidebar = () => {
     }
     
     console.log('Current user roles for sidebar:', userRoles);
+    
+    // Untuk user produksi seperti nanang, tampilkan menu terbatas
+    const isProductionUser = username === 'nanang' || 
+      userRoles.some(role => 
+        ['finishing', 'operator mesin', 'packing', 'quality control'].includes(role)
+      );
+    
+    if (isProductionUser) {
+      return (
+        <>
+          {/* Dashboard Produksi - wajib ada */}
+          <li>
+            <NavLink to="/produksi/dashboard" className={({isActive}) => isActive ? 'active' : ''}>
+              <FontAwesomeIcon icon={faTachometerAlt} className="menu-icon" /> Dashboard Produksi
+            </NavLink>
+          </li>
+          
+          {/* Tugas Saya - untuk melihat pekerjaan yang sudah diambil */}
+          <li>
+            <NavLink to="/produksi/my-tasks" className={({isActive}) => isActive ? 'active' : ''}>
+              <FontAwesomeIcon icon={faClipboardCheck} className="menu-icon" /> Tugas Saya
+            </NavLink>
+          </li>
+          
+          {/* Tugas Tersedia - untuk mengambil pekerjaan baru */}
+          <li>
+            <NavLink to="/produksi/available-tasks" className={({isActive}) => isActive ? 'active' : ''}>
+              <FontAwesomeIcon icon={faListAlt} className="menu-icon" /> Tugas Tersedia
+            </NavLink>
+          </li>
+          
+          {/* Profil Saya */}
+          <li>
+            <NavLink to="/profile" className={({isActive}) => isActive ? 'active' : ''}>
+              <FontAwesomeIcon icon={faUser} className="menu-icon" /> Profil Saya
+            </NavLink>
+          </li>
+          
+          {/* Logout */}
+          <li>
+            <div 
+              className="menu-item"
+              onClick={() => {
+                localStorage.removeItem('jwtToken');
+                localStorage.removeItem('username');
+                localStorage.removeItem('role');
+                localStorage.removeItem('userRoles');
+                window.location.href = '/login';
+              }}
+            >
+              <span>
+                <FontAwesomeIcon icon={faSignOutAlt} className="menu-icon" /> Logout
+              </span>
+            </div>
+          </li>
+        </>
+      );
+    }
     
     // PENTING: SELALU tampilkan sidebar untuk owner dan admin
     if (userRoles.includes('owner') || userRoles.includes('admin') || 
@@ -379,7 +439,6 @@ const Sidebar = () => {
       );
     }
     
-    // Kode untuk role lainnya...
     // Default menu untuk semua role
     return (
       <>

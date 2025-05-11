@@ -37,6 +37,16 @@ const HRDDashboard = lazy(() => import('./pages/dashboard/HRDDashboard'));
 // Import dashboard components yang sudah ada
 const ProductionTeamDashboard = lazy(() => import('./pages/produksi/ProductionTeamDashboard'));
 
+// Import profile components
+// const UserProfile = lazy(() => import('./pages/user/UserProfile'));
+// const UserProfileEdit = lazy(() => import('./pages/user/UserProfileEdit'));
+// const UserProfileDetail = lazy(() => import('./pages/user/UserProfileDetail'));
+// const UserProfileAdd = lazy(() => import('./pages/user/UserProfileAdd'));
+// const UserProfileList = lazy(() => import('./pages/user/UserProfileList'));
+const UserProfilePage = lazy(() => import('./pages/user/UserProfilePage'));
+// const UserProfileDetailView = lazy(() => import('./pages/user/UserProfileDetailView'));
+// const UserProfileEditView = lazy(() => import('./pages/user/UserProfileEditView'));
+
 // Import dashboard baru
 const WarehouseDashboard = lazy(() => import('./pages/dashboard/WarehouseDashboard'));
 const MarketingDashboard = lazy(() => import('./pages/dashboard/MarketingDashboard'));
@@ -360,6 +370,82 @@ const setupErrorHandling = () => {
       event.preventDefault();
     }
   });
+};
+
+// Enhance the RouterErrorBoundary component
+
+const RouterErrorBoundary = ({ children }) => {
+  const [hasRouterError, setHasRouterError] = useState(false);
+  
+  useEffect(() => {
+    // More specific error handler for React Router errors
+    const handleRouterError = (event) => {
+      if (event.error && 
+          (event.error.message?.includes('history') || 
+           event.error.message?.includes('Could not find a route') ||
+           event.error.stack?.includes('history.ts') ||
+           event.error.stack?.includes('hooks.tsx'))) {
+        
+        console.error('Router error detected:', event.error);
+        setHasRouterError(true);
+        
+        // Prevent the error from crashing the app
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
+    
+    window.addEventListener('error', handleRouterError, true);
+    
+    // This will handle unhandled promise rejections related to routing
+    const handleRejection = (event) => {
+      if (event.reason?.message?.includes('history') || 
+          event.reason?.stack?.includes('history.ts')) {
+        console.error('Router promise rejection:', event.reason);
+        setHasRouterError(true);
+        event.preventDefault();
+      }
+    };
+    
+    window.addEventListener('unhandledrejection', handleRejection);
+    
+    return () => {
+      window.removeEventListener('error', handleRouterError, true);
+      window.removeEventListener('unhandledrejection', handleRejection);
+    };
+  }, []);
+
+  // Reset error when URL changes
+  useEffect(() => {
+    const resetErrorOnNavigation = () => {
+      if (hasRouterError) {
+        setHasRouterError(false);
+      }
+    };
+    
+    window.addEventListener('popstate', resetErrorOnNavigation);
+    return () => window.removeEventListener('popstate', resetErrorOnNavigation);
+  }, [hasRouterError]);
+  
+  if (hasRouterError) {
+    return (
+      <div className="router-error-container p-4 bg-warning text-dark">
+        <h3>Navigation Error</h3>
+        <p>There was a problem with the application navigation.</p>
+        <button 
+          onClick={() => {
+            setHasRouterError(false);
+            window.location.href = '/dashboard'; 
+          }}
+          className="btn btn-primary"
+        >
+          Go to Dashboard
+        </button>
+      </div>
+    );
+  }
+  
+  return children;
 };
 
 // Login Page Component
@@ -920,28 +1006,28 @@ const AppLayout = ({ children, isEmergencyMode }) => {
   );
 };
 
-// Tingkatkan logic ProtectedRoute
+// Improved ProtectedRoute that handles loading state better
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('jwtToken');
   const isLoggedIn = token !== null;
+  const [isVerifying, setIsVerifying] = useState(true);
   
-  // Check for emergency modes with better detection
-  const isEmergencyMode = 
-    token === 'emergency-direct-access-token' || 
-    token === 'emergency-token-123' ||
-    localStorage.getItem('emergency_login_time') !== null;
+  useEffect(() => {
+    // Simulate token verification
+    setTimeout(() => {
+      setIsVerifying(false);
+    }, 300);
+  }, []);
   
-  const currentPath = window.location.pathname;
+  if (isVerifying) {
+    return <LoadingSpinner />;
+  }
   
-  console.log(`Route access: ${currentPath} | Auth status: ${isLoggedIn ? 'Logged in' : 'Not logged in'} | Emergency: ${isEmergencyMode ? 'Yes' : 'No'}`);
-  
-  // Redirect to login if not logged in
   if (!isLoggedIn) {
     return <Navigate to="/login" replace />;
   }
   
-  // Pass emergency mode flag to AppLayout
-  return <AppLayout isEmergencyMode={isEmergencyMode}>{children}</AppLayout>;
+  return <AppLayout>{children}</AppLayout>;
 };
 
 // Perbaikan pada fungsi determineUserDashboard
@@ -1120,225 +1206,292 @@ const SimpleApp = () => {
     
     return () => clearInterval(intervalId);
   }, []);
-  
+
+  useEffect(() => {
+    const safeNavigate = (path) => {
+      window.location.href = path;
+    };
+    
+    if (authState.isLoading || !authState.isLoggedIn) {
+      return;
+    }
+
+    const username = localStorage.getItem('username');
+    
+    // Khusus untuk user nanang, selalu arahkan ke dashboard produksi
+    if (username === 'nanang') {
+      if (!window.location.pathname.includes('/produksi/')) {
+        console.log('Redirecting nanang to production dashboard');
+        setTimeout(() => {
+          safeNavigate('/produksi/dashboard');
+        }, 100);
+      }
+      return;
+    }
+    
+    // Untuk user produksi lainnya
+    const role = localStorage.getItem('role')?.toLowerCase();
+    if (role === 'finishing' || 
+        role === 'operator mesin' || 
+        role === 'packing' || 
+        role === 'quality control') {
+      
+      if (!window.location.pathname.includes('/produksi/')) {
+        console.log('Redirecting production user to production dashboard');
+        setTimeout(() => {
+          safeNavigate('/produksi/dashboard');
+        }, 100);
+      }
+    }
+  }, [authState.isLoading, authState.isLoggedIn]);
+
   if (authState.isLoading) {
     return <div className="loading-container"><LoadingSpinner /></div>;
   }
   
   return (
-    <BrowserRouter>
-      <div className="app-container">
-        <Routes>
-          <Route path="/login" element={
-            authState.isLoggedIn ? <Navigate to="/" replace /> : <LoginPage />
-          } />
-          
-          {/* Route untuk dashboard berdasarkan role */}
-          <Route 
-            path="/dashboard" 
-            element={
+    <RouterErrorBoundary>
+      <BrowserRouter>
+        <div className="app-container">
+          <Routes>
+            <Route path="/login" element={
+              authState.isLoggedIn ? <Navigate to="/" replace /> : <LoginPage />
+            } />
+            
+            {/* Route untuk dashboard berdasarkan role */}
+            <Route 
+              path="/dashboard" 
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
+              path="/produksi/dashboard" 
+              element={
+                <ProtectedRoute>
+                  <ProductionTeamDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
+              path="/produksi/my-tasks" 
+              element={
+                <ProtectedRoute>
+                  <ProductionTeamDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
+              path="/produksi/available-tasks" 
+              element={
+                <ProtectedRoute>
+                  <ProductionTeamDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
+              path="/profile" 
+              element={
+                <ProtectedRoute>
+                  <UserProfilePage />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Default route yang akan mengalihkan ke dashboard sesuai role */}
+            <Route 
+              path="/" 
+              element={
+                <Navigate 
+                  to={(() => {
+                    try {
+                      const userRolesStr = localStorage.getItem('userRoles');
+                      const userRoles = userRolesStr ? JSON.parse(userRolesStr) : [];
+                      return determineUserDashboard(userRoles);
+                    } catch (error) {
+                      // Jika terjadi error parsing, default ke dashboard
+                      console.error('Error parsing userRoles:', error);
+                      return '/dashboard';
+                    }
+                  })()}
+                  replace 
+                />
+              } 
+            />
+            
+            {/* Order */}
+            <Route path="/order-list" element={<ProtectedRoute><OrderList /></ProtectedRoute>} />
+            <Route path="/order/:id" element={<ProtectedRoute><OrderDetail /></ProtectedRoute>} /> {/* Rute Detail Order */}
+            <Route path="/order-detail/:id" element={ // <-- Gunakan :id untuk parameter
+                <ProtectedRoute> {/* Jika perlu proteksi login */}
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <OrderDetail />
+                  </Suspense>
+                </ProtectedRoute>
+            } />
+            <Route path="/form-input-order" element={
               <ProtectedRoute>
-                <Dashboard />
+                <FormInputOrder />
               </ProtectedRoute>
-            } 
-          />
-          
-          <Route 
-            path="/produksi/dashboard" 
-            element={
+            } />
+            <Route path="/form-input-order/:id" element={
+              <ProtectedRoute>
+                <FormInputOrder />
+              </ProtectedRoute>
+            } />
+            
+            {/* Customer */}
+            <Route path="/customers" element={<ProtectedRoute><CustomerList /></ProtectedRoute>} />
+            <Route path="/customers/:id" element={<ProtectedRoute><CustomerDetail /></ProtectedRoute>} />
+            <Route path="/customers/edit/:id" element={<ProtectedRoute><CustomerEdit /></ProtectedRoute>} />
+            <Route path="/customers/view/:id" element={<ProtectedRoute><CustomerDetail /></ProtectedRoute>} />
+            <Route path="/customers/add" element={<ProtectedRoute><CustomerAdd /></ProtectedRoute>} />
+
+            {/* Produksi */}
+            <Route path="/produksi/stages" element={<ProtectedRoute><ProductionStageConfig /></ProtectedRoute>} />
+            <Route path="/produksi/:id" element={<ProtectedRoute><ProductionOrderDetail /></ProtectedRoute>} /> {/* Rute Detail Produksi */}
+            <Route path="/produksi/daftar-order" element={<ProtectedRoute><ProductionOrderList /></ProtectedRoute>} />
+            <Route path="/produksi" element={<ProtectedRoute><ProductionOrderList /></ProtectedRoute>} /> {/* Rute List Produksi */}
+
+
+            {/* Keuangan */}
+            <Route path="/keuangan/daftar-pembayaran" element={<ProtectedRoute><DaftarPembayaranOrder /></ProtectedRoute>} />
+
+
+            <Route path="/form-input-order" element={
+              <ProtectedRoute>
+                <FormInputOrder />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/form-input-order/:id" element={
+              <ProtectedRoute>
+                <FormInputOrder />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/keuangan/daftar-pembayaran" element={
+              <ProtectedRoute>
+                <DaftarPembayaranOrder />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/dashboard/admin-keuangan" element={
+              <ProtectedRoute>
+                <DashboardAdminKeuangan />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/tools/inventaris-gudang" element={
+              <ProtectedRoute>
+                <InventarisGudang />
+              </ProtectedRoute>
+            } />
+            
+            {/* Laporan */}
+            <Route path="/laporan/order/harian" element={<ProtectedRoute><LaporanOrderHarian /></ProtectedRoute>} />
+            <Route path="/laporan/order/bulanan" element={<ProtectedRoute><LaporanOrderBulanan /></ProtectedRoute>} />
+            
+            {/* Notifikasi */}
+            <Route path="/notifications/center" element={
+              <ProtectedRoute>
+                <NotificationCenter />
+                </ProtectedRoute>
+            } />
+            <Route path="/notifications/templates" element={
+              <ProtectedRoute>
+                <NotificationTemplates />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/dashboard/marketing-offline" element={
+              <ProtectedRoute>
+                <PlaceholderPage title="Marketing Offline Dashboard" />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/dashboard/marketing-online" element={
+              <ProtectedRoute>
+                <PlaceholderPage title="Marketing Online Dashboard" />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/produksi/dashboard" element={
               <ProtectedRoute>
                 <ProductionTeamDashboard />
               </ProtectedRoute>
-            } 
-          />
-          
-          {/* Default route yang akan mengalihkan ke dashboard sesuai role */}
-          <Route 
-            path="/" 
-            element={
-              <Navigate 
-                to={(() => {
-                  try {
-                    const userRolesStr = localStorage.getItem('userRoles');
-                    const userRoles = userRolesStr ? JSON.parse(userRolesStr) : [];
-                    return determineUserDashboard(userRoles);
-                  } catch (error) {
-                    // Jika terjadi error parsing, default ke dashboard
-                    console.error('Error parsing userRoles:', error);
-                    return '/dashboard';
-                  }
-                })()}
-                replace 
-              />
-            } 
-          />
-          
-          {/* Order */}
-          <Route path="/order-list" element={<ProtectedRoute><OrderList /></ProtectedRoute>} />
-          <Route path="/order/:id" element={<ProtectedRoute><OrderDetail /></ProtectedRoute>} /> {/* Rute Detail Order */}
-          <Route path="/order-detail/:id" element={ // <-- Gunakan :id untuk parameter
-              <ProtectedRoute> {/* Jika perlu proteksi login */}
-                <Suspense fallback={<LoadingSpinner />}>
-                  <OrderDetail />
-                </Suspense>
-              </ProtectedRoute>
-          } />
-          <Route path="/form-input-order" element={
-            <ProtectedRoute>
-              <FormInputOrder />
-            </ProtectedRoute>
-          } />
-          <Route path="/form-input-order/:id" element={
-            <ProtectedRoute>
-              <FormInputOrder />
-            </ProtectedRoute>
-          } />
-          
-          {/* Customer */}
-          <Route path="/customers" element={<ProtectedRoute><CustomerList /></ProtectedRoute>} />
-          <Route path="/customers/:id" element={<ProtectedRoute><CustomerDetail /></ProtectedRoute>} />
-          <Route path="/customers/edit/:id" element={<ProtectedRoute><CustomerEdit /></ProtectedRoute>} />
-          <Route path="/customers/view/:id" element={<ProtectedRoute><CustomerDetail /></ProtectedRoute>} />
-          <Route path="/customers/add" element={<ProtectedRoute><CustomerAdd /></ProtectedRoute>} />
-
-          {/* Produksi */}
-          <Route path="/produksi/stages" element={<ProtectedRoute><ProductionStageConfig /></ProtectedRoute>} />
-          <Route path="/produksi/:id" element={<ProtectedRoute><ProductionOrderDetail /></ProtectedRoute>} /> {/* Rute Detail Produksi */}
-          <Route path="/produksi/daftar-order" element={<ProtectedRoute><ProductionOrderList /></ProtectedRoute>} />
-          <Route path="/produksi" element={<ProtectedRoute><ProductionOrderList /></ProtectedRoute>} /> {/* Rute List Produksi */}
-
-
-          {/* Keuangan */}
-          <Route path="/keuangan/daftar-pembayaran" element={<ProtectedRoute><DaftarPembayaranOrder /></ProtectedRoute>} />
-
-
-          <Route path="/form-input-order" element={
-            <ProtectedRoute>
-              <FormInputOrder />
-            </ProtectedRoute>
-          } />
-
-          <Route path="/form-input-order/:id" element={
-            <ProtectedRoute>
-              <FormInputOrder />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="/keuangan/daftar-pembayaran" element={
-            <ProtectedRoute>
-              <DaftarPembayaranOrder />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="/dashboard/admin-keuangan" element={
-            <ProtectedRoute>
-              <DashboardAdminKeuangan />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="/tools/inventaris-gudang" element={
-            <ProtectedRoute>
-              <InventarisGudang />
-            </ProtectedRoute>
-          } />
-          
-          {/* Laporan */}
-          <Route path="/laporan/order/harian" element={<ProtectedRoute><LaporanOrderHarian /></ProtectedRoute>} />
-          <Route path="/laporan/order/bulanan" element={<ProtectedRoute><LaporanOrderBulanan /></ProtectedRoute>} />
-          
-          {/* Notifikasi */}
-          <Route path="/notifications/center" element={
-            <ProtectedRoute>
-              <NotificationCenter />
-              </ProtectedRoute>
-          } />
-          <Route path="/notifications/templates" element={
-            <ProtectedRoute>
-              <NotificationTemplates />
-            </ProtectedRoute>
-          } />
-
-          <Route path="/dashboard/marketing-offline" element={
-            <ProtectedRoute>
-              <PlaceholderPage title="Marketing Offline Dashboard" />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="/dashboard/marketing-online" element={
-            <ProtectedRoute>
-              <PlaceholderPage title="Marketing Online Dashboard" />
-            </ProtectedRoute>
-          } />
-
-          <Route path="/produksi/dashboard" element={
-            <ProtectedRoute>
-              <ProductionTeamDashboard />
-            </ProtectedRoute>
-          } />
-                    
-          <Route path="/dashboard/performa-gudang" element={
-            <ProtectedRoute>
-              <PlaceholderPage title="Performa Gudang Dashboard" />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="/tools/invoice-label-auto" element={
-            <ProtectedRoute>
-              <PlaceholderPage title="Invoice & Label Otomatis" />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="/tools/export-laporan" element={
-            <ProtectedRoute>
-              <PlaceholderPage title="Export Laporan" />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="/tools/feedback-wa" element={
-            <ProtectedRoute>
-              <PlaceholderPage title="Feedback Customer WA" />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="/laporan/order/grafik" element={
-            <ProtectedRoute>
-              <PlaceholderPage title="Grafik Omzet" />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="/laporan/produksi/mingguan" element={
-            <ProtectedRoute>
-              <PlaceholderPage title="Produksi Mingguan" />
-            </ProtectedRoute>
-          } />
-
-          <Route 
-            path="/dashboard/hrd" 
-            element={
+            } />
+                      
+            <Route path="/dashboard/performa-gudang" element={
               <ProtectedRoute>
-                <HRDDashboard />
+                <PlaceholderPage title="Performa Gudang Dashboard" />
               </ProtectedRoute>
-            } 
-          />
+            } />
+            
+            <Route path="/tools/invoice-label-auto" element={
+              <ProtectedRoute>
+                <PlaceholderPage title="Invoice & Label Otomatis" />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/tools/export-laporan" element={
+              <ProtectedRoute>
+                <PlaceholderPage title="Export Laporan" />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/tools/feedback-wa" element={
+              <ProtectedRoute>
+                <PlaceholderPage title="Feedback Customer WA" />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/laporan/order/grafik" element={
+              <ProtectedRoute>
+                <PlaceholderPage title="Grafik Omzet" />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/laporan/produksi/mingguan" element={
+              <ProtectedRoute>
+                <PlaceholderPage title="Produksi Mingguan" />
+              </ProtectedRoute>
+            } />
 
-          {/* Dashboard Baru */}
-          <Route path="/dashboard/gudang" element={<ProtectedRoute><WarehouseDashboard /></ProtectedRoute>} />
-          <Route path="/dashboard/marketing" element={<ProtectedRoute><MarketingDashboard /></ProtectedRoute>} />
-          <Route path="/dashboard/keuangan" element={<ProtectedRoute><FinanceDashboard /></ProtectedRoute>} />
-          <Route path="/dashboard/rnd" element={<ProtectedRoute><RnDDashboard /></ProtectedRoute>} />
-          
-          {/* Rute 404 (Catch-all) */}
-          <Route path="*" element={
-            <ProtectedRoute>
-              <div className="placeholder-page">
-                <h2>404 - Halaman Tidak Ditemukan</h2>
-                <p>Halaman yang Anda cari tidak ada.</p>
-              </div>
-            </ProtectedRoute>
-          } />
-        </Routes>
-      </div>
-    </BrowserRouter>
+            <Route 
+              path="/dashboard/hrd" 
+              element={
+                <ProtectedRoute>
+                  <HRDDashboard />
+                </ProtectedRoute>
+              } 
+            />
+
+            {/* Dashboard Baru */}
+            <Route path="/dashboard/gudang" element={<ProtectedRoute><WarehouseDashboard /></ProtectedRoute>} />
+            <Route path="/dashboard/marketing" element={<ProtectedRoute><MarketingDashboard /></ProtectedRoute>} />
+            <Route path="/dashboard/keuangan" element={<ProtectedRoute><FinanceDashboard /></ProtectedRoute>} />
+            <Route path="/dashboard/rnd" element={<ProtectedRoute><RnDDashboard /></ProtectedRoute>} />
+            
+            {/* Rute 404 (Catch-all) */}
+            <Route path="*" element={
+              <ProtectedRoute>
+                <div className="placeholder-page">
+                  <h2>404 - Halaman Tidak Ditemukan</h2>
+                  <p>Halaman yang Anda cari tidak ada.</p>
+                </div>
+              </ProtectedRoute>
+            } />
+          </Routes>
+        </div>
+      </BrowserRouter>
+    </RouterErrorBoundary>
   );
 };
 
