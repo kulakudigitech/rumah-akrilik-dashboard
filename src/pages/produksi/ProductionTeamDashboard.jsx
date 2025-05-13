@@ -1,20 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Container, Row, Col, Card, Button, Alert, Badge, 
-  Form, Tabs, Tab, Table, ProgressBar, Spinner 
+  Form, Table, ProgressBar, Spinner 
 } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faClipboardCheck, faListAlt, faUserClock, 
-  faCalendarAlt, faFilter, faSearch, faTasks
+  faCalendarAlt, faExclamationTriangle, faCheckCircle
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import './ProductionTeamDashboard.css';
+import TaskStatusManager from '../../utils/TaskStatusManager';
 
 const ProductionTeamDashboard = () => {
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [userRoles, setUserRoles] = useState([]);
   const [myAssignments, setMyAssignments] = useState([]);
@@ -29,6 +28,38 @@ const ProductionTeamDashboard = () => {
   // Base API URL
   const API_URL = 'https://rumahakrilik.id/api';
   
+  // Fungsi untuk memuat data tugas dari API
+  const fetchTasks = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('jwtToken');
+      const username = localStorage.getItem('username');
+      
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+      
+      // Coba mendapatkan data dari API
+      const response = await axios.get(`${API_URL}/orders/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (response.data && response.data.results) {
+        // Konversi data API ke format yang dibutuhkan
+        const myTasks = mapOrdersToAssignments(response.data.results, username);
+        setMyAssignments(myTasks);
+      } else {
+        // Jika tidak ada data, gunakan data mock
+        setMyAssignments([]);
+      }
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+      setMyAssignments([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
   // Load user info when component mounts
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -39,23 +70,12 @@ const ProductionTeamDashboard = () => {
         // Special handling untuk user nanang
         if (username === 'nanang') {
           console.log("Special handling for user nanang - setting production roles");
-          
-          // Set main role sebagai finishing
           localStorage.setItem('role', 'finishing');
+          localStorage.setItem('userRoles', JSON.stringify(['finishing', 'operator mesin', 'packing', 'quality control']));
           
-          // Set multiple roles untuk akses yang lebih luas di produksi
-          const nanangRoles = [
-            {name: 'finishing'}, 
-            {name: 'operator mesin'}, 
-            {name: 'packing'}, 
-            {name: 'quality control'}
-          ];
-          localStorage.setItem('userRoles', JSON.stringify(nanangRoles));
-          
-          // Perbarui state komponen
+          // Set state pada komponen juga
           setUserRoles(['finishing', 'operator mesin', 'packing', 'quality control']);
         } else {
-          // Handle user produksi lainnya
           try {
             if (userRolesStr) {
               const parsedRoles = JSON.parse(userRolesStr);
@@ -86,6 +106,7 @@ const ProductionTeamDashboard = () => {
           fetchAvailableTasks()
         ]);
         
+        setLoading(false);
       } catch (error) {
         console.error('Error fetching user info:', error);
         toast.error('Gagal memuat informasi pengguna');
@@ -111,11 +132,17 @@ const ProductionTeamDashboard = () => {
         throw new Error('Authentication required');
       }
       
-      const response = await axios.get(`${API_URL}/users/me/`, {
-        headers: { Authorization: `Bearer ${token}` }
+      // Use mock profile data for now since it's not in the endpoint
+      setUserProfile({
+        username: localStorage.getItem('username') || 'User',
+        full_name: username === 'nanang' ? 'Nanang Finishing' : (localStorage.getItem('username') || 'User'),
+        join_date: '2022-01-15',
+        employment_status: 'Tetap',
+        work_days: 'Senin - Sabtu',
+        work_hours: '08:00 - 17:00',
+        department: 'Produksi',
+        position: localStorage.getItem('role') || 'Staff Produksi'
       });
-      
-      setUserProfile(response.data);
       
     } catch (error) {
       console.error('Error fetching user profile:', error);
@@ -138,51 +165,76 @@ const ProductionTeamDashboard = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('jwtToken');
+      const username = localStorage.getItem('username');
       
       if (!token) {
         throw new Error('Authentication required');
       }
       
-      // Construct date filters for API
-      let startDate, endDate;
-      
-      if (filterPeriod === 'current-month') {
-        const now = new Date();
-        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-      } else if (filterPeriod === 'custom') {
-        startDate = new Date(filterYear, filterMonth, 1);
-        endDate = new Date(filterYear, parseInt(filterMonth) + 1, 0);
-      } else if (filterPeriod === 'all-time') {
-        startDate = new Date(2020, 0, 1); // Far back enough
-        endDate = new Date(2050, 11, 31); // Far ahead enough
-      }
-      
-      // Format dates for API
-      const formattedStartDate = startDate.toISOString().split('T')[0];
-      const formattedEndDate = endDate.toISOString().split('T')[0];
-      
-      const response = await axios.get(`${API_URL}/production-tracking/my-tasks/`, {
-        headers: { Authorization: `Bearer ${token}` },
-        params: {
-          start_date: formattedStartDate,
-          end_date: formattedEndDate
-        }
+      // Use real API data
+      const response = await axios.get(`${API_URL}/orders/`, {
+        headers: { Authorization: `Bearer ${token}` }
       });
       
-      if (response.data && Array.isArray(response.data)) {
-        setMyAssignments(response.data);
-      } else {
-        // Fallback to mock data if API doesn't return expected format
-        setMyAssignments(getMockTasks());
+      if (response.data && response.data.results) {
+        // Convert API data to the format expected by the dashboard
+        // Find orders that have any tracking assigned to the current user or in a state that matches user roles
+        const userAssignments = mapOrdersToAssignments(response.data.results, username);
+        setMyAssignments(userAssignments);
       }
       
     } catch (error) {
       console.error('Error fetching my tasks:', error);
-      setMyAssignments(getMockTasks());
+      // Fallback to empty array
+      setMyAssignments([]);
+      toast.error('Gagal memuat daftar tugas');
     } finally {
       setLoading(false);
     }
+  };
+  
+  // Convert API orders to assignments format
+  const mapOrdersToAssignments = (orders, username) => {
+    const assignments = [];
+    
+    orders.forEach(order => {
+      // First check if any tracking is assigned to this user or completed
+      order.production_trackings.forEach(tracking => {
+        // Skip if not in user's roles
+        if (!userRoles.some(role => role.toLowerCase() === tracking.stage_name.toLowerCase())) {
+          return;
+        }
+        
+        // If tracking is assigned to the current user or is completed
+        if ((tracking.assigned_to === username || tracking.status === "completed") && 
+            tracking.is_active) {
+          
+          const progress = tracking.status === "completed" ? 100 : 
+                          tracking.status === "in-progress" ? 50 : 0;
+          
+          assignments.push({
+            id: tracking.id,
+            order_id: order.id,
+            order_number: order.order_number,
+            customer_name: order.customer?.name || 'Unknown Customer',
+            product_name: order.items && order.items.length > 0 ? 
+                        order.items[0].nama_produk : 'Unknown Product',
+            stage_name: tracking.stage_name,
+            deadline: order.due_date || '',
+            status: tracking.status,
+            progress: progress,
+            claimed_date: tracking.start_time || '',
+            completed_date: tracking.end_time || '',
+            specifications: order.items && order.items.length > 0 ? 
+                          order.items[0].specifications : {},
+            notes: order.items && order.items.length > 0 ? 
+                 order.items[0].notes : '',
+          });
+        }
+      });
+    });
+    
+    return assignments;
   };
   
   // Fetch available tasks
@@ -194,21 +246,74 @@ const ProductionTeamDashboard = () => {
         throw new Error('Authentication required');
       }
       
-      const response = await axios.get(`${API_URL}/production-tracking/available-tasks/`, {
+      // Use real API data
+      const response = await axios.get(`${API_URL}/orders/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      if (response.data && Array.isArray(response.data)) {
-        setAvailableOrders(response.data);
-      } else {
-        // Fallback to mock data
-        setAvailableOrders(getMockAvailableTasks());
+      if (response.data && response.data.results) {
+        // Convert API data to the format expected by the dashboard
+        const availableTasks = getAvailableTasks(response.data.results);
+        setAvailableOrders(availableTasks);
       }
       
     } catch (error) {
       console.error('Error fetching available tasks:', error);
-      setAvailableOrders(getMockAvailableTasks());
+      // Fallback to empty array
+      setAvailableOrders([]);
+      toast.error('Gagal memuat daftar tugas tersedia');
     }
+  };
+  
+  // Get tasks available for claiming
+  const getAvailableTasks = (orders) => {
+    const availableTasks = [];
+    
+    orders.forEach(order => {
+      // Look for production trackings that are pending and match user roles
+      order.production_trackings.forEach(tracking => {
+        // Only add if status is pending and matches user role
+        if (tracking.status === 'pending' && 
+            userRoles.some(role => role.toLowerCase() === tracking.stage_name.toLowerCase()) &&
+            tracking.is_active) {
+          
+          // Check if previous stage is completed
+          const stageNumber = tracking.stage;
+          const previousStage = order.production_trackings.find(t => t.stage === stageNumber - 1);
+          const previousStageCompleted = !previousStage || previousStage.status === 'completed';
+          
+          // Only include if previous stage is completed
+          if (previousStageCompleted) {
+            // Calculate priority based on how many other stages are completed
+            const completedStages = order.production_trackings.filter(t => t.status === 'completed').length;
+            const totalStages = order.production_trackings.length;
+            let priority = 'low';
+            
+            if (completedStages > totalStages * 0.7) priority = 'high';
+            else if (completedStages > totalStages * 0.3) priority = 'medium';
+            
+            availableTasks.push({
+              id: tracking.id,
+              order_id: order.id,
+              order_number: order.order_number,
+              customer_name: order.customer?.name || 'Unknown Customer',
+              product_name: order.items && order.items.length > 0 ? 
+                          order.items[0].nama_produk : 'Unknown Product',
+              stage_name: tracking.stage_name,
+              deadline: order.due_date || '',
+              status: 'available',
+              priority: priority,
+              specifications: order.items && order.items.length > 0 ? 
+                            order.items[0].specifications : {},
+              notes: order.items && order.items.length > 0 ? 
+                   order.items[0].notes : '',
+            });
+          }
+        }
+      });
+    });
+    
+    return availableTasks;
   };
   
   // Claim a task
@@ -217,7 +322,11 @@ const ProductionTeamDashboard = () => {
       setLoading(true);
       const token = localStorage.getItem('jwtToken');
       
-      await axios.post(`${API_URL}/production-tracking/${taskId}/claim/`, {}, {
+      await axios.patch(`${API_URL}/production-trackings/${taskId}/`, {
+        status: 'in-progress',
+        assigned_to: localStorage.getItem('username'),
+        start_time: new Date().toISOString()
+      }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -232,21 +341,34 @@ const ProductionTeamDashboard = () => {
     } catch (error) {
       console.error('Error claiming task:', error);
       toast.error('Gagal mengklaim tugas');
+      
+      // Simulate success in case API doesn't support this yet
+      setTimeout(async () => {
+        await Promise.all([
+          fetchMyTasks(),
+          fetchAvailableTasks()
+        ]);
+      }, 1000);
     } finally {
       setLoading(false);
     }
   };
   
   // Update task status
-  const updateTaskStatus = async (taskId, status, progress) => {
+  const updateTaskStatus = async (taskId, status) => {
     try {
       setLoading(true);
       const token = localStorage.getItem('jwtToken');
       
-      await axios.patch(`${API_URL}/production-tracking/${taskId}/`, {
-        status,
-        progress
-      }, {
+      const updateData = {
+        status: status,
+      };
+      
+      if (status === 'completed') {
+        updateData.end_time = new Date().toISOString();
+      }
+      
+      await axios.patch(`${API_URL}/production-trackings/${taskId}/`, updateData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -258,90 +380,14 @@ const ProductionTeamDashboard = () => {
     } catch (error) {
       console.error('Error updating task status:', error);
       toast.error('Gagal memperbarui status tugas');
+      
+      // Simulate success in case API doesn't support this yet
+      setTimeout(() => {
+        fetchMyTasks();
+      }, 1000);
     } finally {
       setLoading(false);
     }
-  };
-  
-  // Mock data for development/fallback
-  const getMockTasks = () => {
-    return [
-      {
-        id: 1,
-        order_id: 101,
-        order_number: 'ORD-2025-001',
-        customer_name: 'PT Tekno Solusi',
-        product_name: 'Signage Akrilik',
-        stage_name: 'Finishing',
-        deadline: '2025-05-15',
-        status: 'in-progress',
-        progress: 75,
-        claimed_date: '2025-05-10'
-      },
-      {
-        id: 2,
-        order_id: 102,
-        order_number: 'ORD-2025-002',
-        customer_name: 'Restoran Sejera',
-        product_name: 'Akrilik Display Menu',
-        stage_name: 'Finishing',
-        deadline: '2025-05-14',
-        status: 'completed',
-        progress: 100,
-        claimed_date: '2025-05-09',
-        completed_date: '2025-05-12'
-      },
-      {
-        id: 3,
-        order_id: 103,
-        order_number: 'ORD-2025-003',
-        customer_name: 'PT Maju Jaya',
-        product_name: 'Plakat Akrilik Premium',
-        stage_name: 'Finishing',
-        deadline: '2025-05-18',
-        status: 'in-progress',
-        progress: 30,
-        claimed_date: '2025-05-11'
-      }
-    ];
-  };
-  
-  const getMockAvailableTasks = () => {
-    return [
-      {
-        id: 4,
-        order_id: 104,
-        order_number: 'ORD-2025-004',
-        customer_name: 'Hotel Bintang Lima',
-        product_name: 'Name Tag Akrilik',
-        stage_name: 'Finishing',
-        deadline: '2025-05-18',
-        status: 'available',
-        priority: 'high'
-      },
-      {
-        id: 5,
-        order_id: 105,
-        order_number: 'ORD-2025-005',
-        customer_name: 'Klinik Sehat',
-        product_name: 'Papan Nama Akrilik',
-        stage_name: 'Finishing',
-        deadline: '2025-05-20',
-        status: 'available',
-        priority: 'medium'
-      },
-      {
-        id: 6,
-        order_id: 106,
-        order_number: 'ORD-2025-006',
-        customer_name: 'Perpustakaan Kota',
-        product_name: 'Sign Board Akrilik',
-        stage_name: 'Quality Control',
-        deadline: '2025-05-19',
-        status: 'available',
-        priority: 'medium'
-      }
-    ];
   };
   
   // Helper function to format dates
@@ -355,6 +401,35 @@ const ProductionTeamDashboard = () => {
     });
   };
   
+  // Tambah fungsi untuk memuat data dashboard
+  const loadDashboardData = () => {
+    try {
+      // Cek tasks dari TaskStatusManager
+      const allTasks = TaskStatusManager.getTasksFromStore();
+      const username = localStorage.getItem('username');
+      
+      // Filter tugas yang diambil oleh user ini
+      const myTasks = Object.keys(allTasks)
+        .filter(taskId => allTasks[taskId].assignedTo === username)
+        .map(taskId => ({
+          id: taskId,
+          status: allTasks[taskId].status,
+          // tambahkan property lain yang diperlukan
+        }));
+      
+      // Set ke state
+      setMyAssignments(myTasks);
+      
+      // Jika tidak ada data, coba ambil dari API
+      if (myTasks.length === 0) {
+        fetchTasks();
+      }
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+      fetchTasks(); // fallback ke API
+    }
+  };
+  
   // Render user profile section
   const renderProfileSection = () => {
     if (!userProfile) return null;
@@ -362,7 +437,9 @@ const ProductionTeamDashboard = () => {
     // Calculate years of service
     const joinDate = new Date(userProfile.join_date);
     const today = new Date();
-    const yearsOfService = today.getFullYear() - joinDate.getFullYear();
+    const yearsOfService = today.getFullYear() - joinDate.getFullYear() - 
+                         (today.getMonth() < joinDate.getMonth() || 
+                          (today.getMonth() === joinDate.getMonth() && today.getDate() < joinDate.getDate()) ? 1 : 0);
     
     return (
       <Card className="mb-4">
@@ -457,6 +534,7 @@ const ProductionTeamDashboard = () => {
             </div>
           ) : myAssignments.length === 0 ? (
             <Alert variant="info">
+              <FontAwesomeIcon icon={faExclamationTriangle} className="me-2" />
               Belum ada tugas yang diklaim pada periode ini.
             </Alert>
           ) : (
@@ -465,10 +543,10 @@ const ProductionTeamDashboard = () => {
                 <tr>
                   <th>No. Order</th>
                   <th>Produk</th>
+                  <th>Spesifikasi</th>
                   <th>Tahap</th>
-                  <th>Deadline</th>
-                  <th>Progress</th>
                   <th>Status</th>
+                  <th>Catatan</th>
                   <th>Aksi</th>
                 </tr>
               </thead>
@@ -477,30 +555,38 @@ const ProductionTeamDashboard = () => {
                   <tr key={task.id}>
                     <td>{task.order_number}</td>
                     <td>{task.product_name}</td>
-                    <td>{task.stage_name}</td>
-                    <td>{formatDate(task.deadline)}</td>
                     <td>
-                      <ProgressBar now={task.progress} label={`${task.progress}%`} />
+                      {Object.entries(task.specifications || {}).map(([key, value]) => (
+                        <div key={key}><strong>{key}:</strong> {value}</div>
+                      ))}
+                      {Object.keys(task.specifications || {}).length === 0 && '-'}
                     </td>
+                    <td>{task.stage_name}</td>
                     <td>
-                      <Badge bg={task.status === 'completed' ? 'success' : 'warning'}>
-                        {task.status === 'completed' ? 'Selesai' : 'Dalam Proses'}
+                      <Badge bg={
+                        task.status === 'completed' ? 'success' : 
+                        task.status === 'in-progress' ? 'warning' : 'secondary'
+                      }>
+                        {task.status === 'completed' ? 'Selesai' : 
+                         task.status === 'in-progress' ? 'Dalam Proses' : 'Belum Dimulai'}
                       </Badge>
                     </td>
+                    <td>{task.notes || '-'}</td>
                     <td>
                       {task.status !== 'completed' ? (
                         <Button
                           variant="outline-success"
                           size="sm"
-                          onClick={() => updateTaskStatus(task.id, 'completed', 100)}
+                          onClick={() => updateTaskStatus(task.id, 'completed')}
                         >
+                          <FontAwesomeIcon icon={faCheckCircle} className="me-1" />
                           Selesaikan
                         </Button>
                       ) : (
                         <Button
                           variant="outline-warning"
                           size="sm"
-                          onClick={() => updateTaskStatus(task.id, 'in-progress', task.progress)}
+                          onClick={() => updateTaskStatus(task.id, 'in-progress')}
                         >
                           Batal Selesai
                         </Button>
@@ -518,13 +604,6 @@ const ProductionTeamDashboard = () => {
   
   // Render tasks available for claim
   const renderAvailableTasks = () => {
-    const filteredTasks = availableOrders.filter(task => 
-      userRoles.some(role => 
-        role.toLowerCase() === 'nanang' || 
-        role.toLowerCase() === task.stage_name.toLowerCase()
-      )
-    );
-    
     return (
       <Card>
         <Card.Header as="h5" className="bg-primary text-white">
@@ -537,8 +616,9 @@ const ProductionTeamDashboard = () => {
               <Spinner animation="border" variant="primary" />
               <p className="mt-2">Memuat data...</p>
             </div>
-          ) : filteredTasks.length === 0 ? (
+          ) : availableOrders.length === 0 ? (
             <Alert variant="info">
+              <FontAwesomeIcon icon={faExclamationTriangle} className="me-2" />
               Tidak ada tugas tersedia untuk diklaim saat ini.
             </Alert>
           ) : (
@@ -548,20 +628,27 @@ const ProductionTeamDashboard = () => {
                   <th>No. Order</th>
                   <th>Customer</th>
                   <th>Produk</th>
+                  <th>Spesifikasi</th>
                   <th>Tahap</th>
-                  <th>Deadline</th>
+                  <th>Catatan</th>
                   <th>Prioritas</th>
                   <th>Aksi</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredTasks.map((task) => (
+                {availableOrders.map((task) => (
                   <tr key={task.id}>
                     <td>{task.order_number}</td>
                     <td>{task.customer_name}</td>
                     <td>{task.product_name}</td>
+                    <td>
+                      {Object.entries(task.specifications || {}).map(([key, value]) => (
+                        <div key={key}><strong>{key}:</strong> {value}</div>
+                      ))}
+                      {Object.keys(task.specifications || {}).length === 0 && '-'}
+                    </td>
                     <td>{task.stage_name}</td>
-                    <td>{formatDate(task.deadline)}</td>
+                    <td>{task.notes || '-'}</td>
                     <td>
                       <Badge bg={
                         task.priority === 'high' ? 'danger' : 
@@ -594,7 +681,7 @@ const ProductionTeamDashboard = () => {
     <Container fluid className="production-dashboard">
       <h2 className="dashboard-title">Dashboard Produksi</h2>
       <p className="dashboard-subtitle">
-        Selamat datang, {localStorage.getItem('username')}. Berikut adalah tugas-tugas produksi Anda.
+        Selamat datang, {userProfile?.full_name || localStorage.getItem('username')}. Berikut adalah tugas-tugas produksi Anda.
       </p>
       
       {/* Profil Karyawan */}

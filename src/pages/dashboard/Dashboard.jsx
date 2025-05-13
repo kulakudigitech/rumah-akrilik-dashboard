@@ -120,6 +120,31 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
+    // Cek username & role untuk automatic redirect
+    const username = localStorage.getItem('username');
+    const role = localStorage.getItem('role')?.toLowerCase();
+    
+    console.log("Dashboard loaded, checking redirect for:", username, role);
+    
+    if (username === 'nuruliman' || 
+        role === 'supervisor marketing' || 
+        (role && role.includes('supervisor') && role.includes('marketing'))) {
+      console.log("Redirecting to marketing SPV dashboard");
+      navigate('/dashboard/marketing/spv', { replace: true });
+      return;
+    }
+    
+    // Cek juga untuk role lain yang perlu redirect
+    if (role === 'cs online') {
+      navigate('/dashboard/marketing/cs-online', { replace: true });
+    } else if (role === 'cs offline') {
+      navigate('/dashboard/marketing/cs-offline', { replace: true });
+    } else if (role === 'retail representative') {
+      navigate('/dashboard/marketing/retail', { replace: true });
+    }
+  }, [navigate]);
+
+  useEffect(() => {
     const fetchDashboardData = async () => {
       setLoading(true);
       console.log('Fetching dashboard data...');

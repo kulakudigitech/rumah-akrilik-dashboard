@@ -6,14 +6,14 @@
 
 .dashboard-title {
   font-size: 24px;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
   color: #333;
   font-weight: 600;
 }
 
 .dashboard-subtitle {
   font-size: 14px;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
   color: #666;
 }
 
@@ -132,6 +132,23 @@
   font-size: 12px;
 }
 
+.badge.bg-danger {
+  background-color: #dc3545 !important;
+}
+
+.badge.bg-warning {
+  background-color: #ffc107 !important;
+  color: #212529 !important;
+}
+
+.badge.bg-info {
+  background-color: #17a2b8 !important;
+}
+
+.badge.bg-success {
+  background-color: #28a745 !important;
+}
+
 /* Progress bar styling */
 .progress {
   height: 20px;
@@ -229,9 +246,9 @@
   margin-right: 10px;
 }
 
-/* Badge stylings */
-.badge.bg-info {
-  background-color: #36b9cc !important;
+/* Styling for production tables */
+.table-responsive {
+  overflow-x: auto;
 }
 
 /* Table improvements */
@@ -244,4 +261,104 @@
 
 .table td {
   vertical-align: middle;
+}
+
+/* Style for mobile optimization */
+@media (max-width: 768px) {
+  .production-dashboard {
+    padding: 10px;
+  }
+  
+  .dashboard-title {
+    font-size: 1.5rem;
+  }
+  
+  .dashboard-subtitle {
+    font-size: 0.9rem;
+  }
+}
+
+/* Styling untuk checklist produksi */
+.stage-checklist {
+  display: flex;
+  align-items: center;
+}
+
+.stage-checklist .form-check {
+  margin-bottom: 0;
+}
+
+.stage-checklist .form-check-input:checked + .form-check-label {
+  font-weight: bold;
+  color: #28a745;
+}
+
+/* Animasi untuk transisi selesai */
+.stage-checklist .form-check-input:checked {
+  animation: checkmark 0.2s ease-in-out;
+}
+
+@keyframes checkmark {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+/* Memperbaiki tampilan checkbox */
+.form-check-input {
+  cursor: pointer;
+}
+
+.form-check-input:hover {
+  opacity: 0.8;
+}
+
+/* Styling untuk disabled checkbox */
+.form-check-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Styling untuk checkbox yang sudah complete dan locked */
+.form-check.locked .form-check-input {
+  border-color: #198754;
+  background-color: #198754;
+}
+
+.form-check.locked .form-check-label {
+  color: #198754;
+  text-decoration: underline;
+  font-weight: bold;
+}
+
+/* Styling untuk small text info */
+.text-muted.ms-2 {
+  font-size: 80%;
+  font-style: italic;
+}
+
+/* Tampilan stages pills */
+.stage-pills {
+  display: flex;
+  gap: 5px;
+}
+
+.stage-pill {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background-color: #e9ecef;
+  color: #6c757d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+  border: 1px solid #dee2e6;
+}
+
+.stage-pill.completed {
+  background-color: #28a745;
+  color: white;
+  border-color: #218838;
 }

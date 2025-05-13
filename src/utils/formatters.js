@@ -4,18 +4,15 @@
 
 /**
  * Format angka menjadi format mata uang Rupiah
- * @param {number} amount - Jumlah yang akan diformat
+ * @param {number} value - Jumlah yang akan diformat
  * @returns {string} - String dalam format mata uang Rupiah
  */
-export const formatCurrency = (amount) => {
-  if (amount === null || amount === undefined) return 'Rp 0';
-  
+export const formatCurrency = (value) => {
+  // Format to Rupiah
   return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
-  }).format(amount);
+  }).format(value);
 };
 
 /**
@@ -30,18 +27,24 @@ export const formatNumber = (num) => {
 };
 
 /**
- * Format tanggal ke format Indonesia
- * @param {string|Date} date - Tanggal yang akan diformat
+ * Fungsi untuk memformat tanggal
+ * @param {string} dateString - Tanggal yang akan diformat
  * @returns {string} - String tanggal format Indonesia
  */
-export const formatDate = (date) => {
-  if (!date) return '-';
+export const formatDate = (dateString) => {
+  if (!dateString) return '-';
   
-  return new Date(date).toLocaleDateString('id-ID', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-  });
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('id-ID', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  } catch (e) {
+    console.error('Error formatting date:', e);
+    return dateString;
+  }
 };
 
 /**
@@ -141,4 +144,44 @@ export const getInitials = (name) => {
   }
   
   return (names[0].charAt(0) + names[1].charAt(0)).toUpperCase();
+};
+
+/**
+ * Fungsi untuk mendapatkan warna badge berdasarkan status
+ * @param {string} status - Status
+ * @returns {string} - Warna badge
+ */
+export const getStatusBadgeColor = (status) => {
+  if (!status) return 'secondary';
+  
+  const statusLower = status.toLowerCase();
+  
+  if (statusLower === 'active' || statusLower === 'aktif') return 'success';
+  if (statusLower === 'planned' || statusLower === 'direncanakan') return 'primary';
+  if (statusLower === 'completed' || statusLower === 'selesai') return 'info';
+  if (statusLower === 'cancelled' || statusLower === 'dibatalkan') return 'danger';
+  if (statusLower === 'on-hold' || statusLower === 'tertunda') return 'warning';
+  if (statusLower === 'upcoming' || statusLower === 'akan datang') return 'info';
+  
+  return 'secondary';
+};
+
+/**
+ * Fungsi untuk mendapatkan label status yang lebih user-friendly
+ * @param {string} status - Status
+ * @returns {string} - Label status
+ */
+export const getStatusLabel = (status) => {
+  if (!status) return 'Unknown';
+  
+  const statusMap = {
+    'active': 'Aktif',
+    'planned': 'Direncanakan',
+    'completed': 'Selesai',
+    'cancelled': 'Dibatalkan',
+    'on-hold': 'Tertunda',
+    'upcoming': 'Akan Datang'
+  };
+  
+  return statusMap[status.toLowerCase()] || status;
 };

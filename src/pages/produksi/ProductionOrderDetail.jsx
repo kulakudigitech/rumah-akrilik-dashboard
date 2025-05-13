@@ -8,6 +8,7 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 import { updateProductionTracking } from '../../services/productionService';
 import { sendProductionStatusNotification } from '../../services/notificationService';
+import ProductionProgressCard from '../../components/produksi/ProductionProgressCard';
 
 const ProductionOrderDetail = () => {
   const { id } = useParams(); // Use id instead of orderId consistently
@@ -204,42 +205,10 @@ const ProductionOrderDetail = () => {
 
   // Fetch order data
   useEffect(() => {
-    const fetchOrderData = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get(`https://rumahakrilik.id/api/orders/${id}/`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
-            'Content-Type': 'application/json'
-          }
-        });
-        
-        setOrderData(response.data);
-        
-        // Update stages from API data
-        const trackings = response.data.production_trackings || [];
-        const newStages = {
-          desain: trackings.find(t => t.stage === 1)?.status === 'completed',
-          operator_mesin: trackings.find(t => t.stage === 2)?.status === 'completed',
-          finishing: trackings.find(t => t.stage === 3)?.status === 'completed',
-          quality_control: trackings.find(t => t.stage === 4)?.status === 'completed',
-          packing: trackings.find(t => t.stage === 5)?.status === 'completed',
-          siap_kirim_pasang: trackings.find(t => t.stage === 6)?.status === 'completed'
-        };
-        
-        setStages(newStages);
-        setError(null);
-      } catch (err) {
-        console.error("Error fetching order:", err);
-        setError("Gagal memuat data order. Silakan coba lagi.");
-      } finally {
-        setLoading(false);
-      }
-    }; 
-
-    fetchOrderData();
+    console.log(`Attempting to fetch order details for ID: ${id}`);
+    fetchOrderDetails();
   }, [id]);
-  
+
   // Handle checkbox changes
   const handleStageChange = (stage, checked) => {
     setStages(prev => ({
@@ -595,17 +564,42 @@ const ProductionOrderDetail = () => {
       const token = localStorage.getItem('jwtToken');
       if (!token) throw new Error("Anda perlu login untuk mengakses data.");
 
-      // Gunakan endpoint orders (bukan order) untuk konsistensi dengan API lainnya
-      console.log(`[Fetch Order] API Call: GET /api/orders/${id}/`);
-      const orderResponse = await axios.get(`https://rumahakrilik.id/api/orders/${id}/`, {
-        headers: { 
-          'Authorization': `Bearer ${token}`, 
-          'Content-Type': 'application/json' 
+      // Coba semua kemungkinan endpoint untuk mendapatkan detail order
+      const endpoints = [
+        `https://rumahakrilik.id/api/orders/${id}/`,
+        `https://rumahakrilik.id/api/production-orders/${id}/`,
+        `https://rumahakrilik.id/api/production/${id}/`
+      ];
+      
+      let orderDataResult = null;
+      let successEndpoint = null;
+      
+      for (const endpoint of endpoints) {
+        try {
+          console.log(`[Fetch Order] Trying API Call: GET ${endpoint}`);
+          const orderResponse = await axios.get(endpoint, {
+            headers: { 
+              'Authorization': `Bearer ${token}`, 
+              'Content-Type': 'application/json' 
+            },
+            timeout: 5000 // Tambahkan timeout untuk mencegah hanging
+          });
+          
+          if (orderResponse.data) {
+            orderDataResult = orderResponse.data;
+            successEndpoint = endpoint;
+            console.log(`[Fetch Order] Success from endpoint: ${endpoint}`);
+            break;
+          }
+        } catch (endpointError) {
+          console.warn(`[Fetch Order] Failed from endpoint: ${endpoint}`, endpointError.message);
         }
-      });
+      }
+      
+      if (!orderDataResult) {
+        throw new Error("Gagal memuat detail order dari semua endpoint yang dicoba");
+      }
 
-      if (!orderResponse.data) throw new Error("Gagal memuat detail order");
-      const orderDataResult = orderResponse.data;
       console.log("[Fetch Order] Order data received:", orderDataResult);
       
       // Pengambilan tracking langsung dari respons order
@@ -628,7 +622,7 @@ const ProductionOrderDetail = () => {
       setNotes(trackingRecords[0]?.notes || "");
 
     } catch (error) {
-      console.error("[Fetch Order/Tracking] Error:", error);
+      console.error("[Fetch Order] Error:", error);
       setError(`${error.message || "Gagal memuat detail order/produksi"}. Coba lagi.`);
       if (!useMockData) { console.log("Falling back to mock data after error"); setUseMockData(true); }
     } finally {
@@ -955,6 +949,13 @@ const ProductionOrderDetail = () => {
     }
   };
 
+  const [progressUpdated, setProgressUpdated] = useState(false);
+
+  const handleProgressUpdate = (stages, percentage, responsible) => {
+    setProgressUpdated(true);
+    // Additional logic if needed
+  };
+
   if (loading) {
     return (
       <Container className="mt-4">
@@ -1032,6 +1033,13 @@ const ProductionOrderDetail = () => {
             </Col>
           </Row>
           
+          <ProductionProgressCard 
+            orderId={id} 
+            stages={orderData.productionStages || {}}
+            onProgressUpdate={handleProgressUpdate}
+            initialResponsible={orderData.responsible_person}
+          />
+
           <Form onSubmit={handleSubmit}>
             <h6 className="mb-3">Tracking Produksi</h6>
 

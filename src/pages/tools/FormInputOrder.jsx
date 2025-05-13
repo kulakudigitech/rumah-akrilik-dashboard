@@ -298,6 +298,44 @@ const FormInputOrder = () => {
     }
   }, [orderId, isEditing, loadingDropdown, defaultStatusId]);
 
+  // Tambahkan useEffect untuk auto-detect marketing user
+  useEffect(() => {
+    // Fungsi untuk mendeteksi user login
+    const detectCurrentUser = () => {
+      try {
+        // Ambil username dan role
+        const username = localStorage.getItem('username');
+        const userRole = localStorage.getItem('role')?.toLowerCase() || '';
+        const userId = localStorage.getItem('userId');
+        
+        console.log("Detected current user:", username, "with role:", userRole);
+        
+        // Jika user adalah marketing dan ini form baru (bukan edit)
+        const isMarketingRole = 
+          userRole.includes('marketing') || 
+          userRole.includes('cs') || 
+          userRole.includes('retail');
+        
+        if (isMarketingRole && !isEditing) {
+          // Set sales_person ke user saat ini
+          setFormData(prev => ({
+            ...prev,
+            sales_person: userId
+          }));
+          
+          console.log("Auto-assigned current user as sales person:", username, userId);
+        }
+      } catch (error) {
+        console.error("Error auto-detecting marketing user:", error);
+      }
+    };
+    
+    // Jalankan setelah form sudah siap
+    if (!loadingDropdown && !isEditing) {
+      detectCurrentUser();
+    }
+  }, [loadingDropdown, isEditing]);
+
   // Tambahkan log ini TEPAT SEBELUM return JSX untuk melihat state formData TERAKHIR sebelum render
   console.log("[Render] Current formData state:", formData);
 
