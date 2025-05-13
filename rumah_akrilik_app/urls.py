@@ -51,7 +51,14 @@ from .views import (
     marketing_team_data,
     marketing_performance_data,
     marketing_member_performance,
-    marketing_campaigns_data
+    marketing_campaigns_data,
+    get_marketing_users,
+    get_pending_approval_orders,
+    approve_order_payment,
+    reject_order,
+    NotificationViewSet, # Pastikan NotificationViewSet sudah diimpor
+    get_user_notifications, # Pastikan get_user_notifications sudah diimpor
+    mark_notification_read # Pastikan mark_notification_read sudah diimpor
 )
 
 from rest_framework.decorators import api_view, permission_classes
@@ -80,34 +87,42 @@ router = DefaultRouter()
 router.register('users', UserViewSet, basename='user')
 router.register('groups', GroupViewSet, basename='group')
 router.register('roles', RoleViewSet, basename='role')
-router.register('user-profiles', UserProfileViewSet, basename='userprofile')
+# router.register('user-profiles', UserProfileViewSet, basename='userprofile')  # Komentari ini
+
 # Product Management
 router.register('products', ProductViewSet, basename='product')
 router.register('product-categories', ProductCategoryViewSet, basename='productcategory')
 router.register('product-images', ProductImageViewSet, basename='productimage')
+
 # Customer Management
 router.register('customers', CustomerViewSet, basename='customer')
 router.register('customer-addresses', CustomerAddressViewSet, basename='customeraddress')
+
 # Order Management
-router.register('order', OrderViewSet, basename='order') # OrderViewSet sudah diregister di sini sebagai 'order'
-# router.register('order-items', OrderItemViewSet, basename='orderitem')
+router.register('order', OrderViewSet, basename='order')
 router.register('order-status', OrderStatusViewSet, basename='orderstatus')
+
 # Production Management
 router.register('produksi', ProduksiViewSet, basename='produksi')
 router.register('production-jobs', ProductionJobViewSet, basename='productionjob')
 router.register('production-materials', ProductionMaterialViewSet, basename='productionmaterial')
-router.register('production-stages', ProductionStageViewSet) # ProductionStageViewSet sudah diregister di sini
+router.register('production-stages', ProductionStageViewSet)
 router.register('production-tracking', ProductionTrackingViewSet)
+
 # Inventory Management
-router.register('inventory', InventoryViewSet, basename='inventory')
-router.register('transactions', TransactionViewSet, basename='transaction')
+# router.register('inventory', InventoryViewSet, basename='inventory')  # Komentari ini
+# router.register('transactions', TransactionViewSet, basename='transaction')  # Komentari ini
 router.register('suppliers', SupplierViewSet, basename='supplier')
+
 # Marketing
-router.register('rr-visits', RealisasiKunjunganRRViewSet, basename='rrvisit')
+# router.register('rr-visits', RealisasiKunjunganRRViewSet, basename='rrvisit')  # Komentari ini
 router.register('marketing-campaigns', MarketingCampaignViewSet, basename='marketingcampaign')
+
 # Attendance
-router.register('attendance', AbsensiViewSet, basename='attendance')
-# Dashboard
+# router.register('attendance', AbsensiViewSet, basename='attendance')  # Komentari ini
+
+# Notifications
+router.register('notifications', NotificationViewSet, basename='notification')
 
 
 # ======================
@@ -225,8 +240,22 @@ urlpatterns = [
     # path('api/', include('rumah_akrilik_app.api.urls')),
 
     # Tambahkan di urls.py
-    path('marketing/team/', marketing_team_data, name='marketing_team_data'),
+    path('marketing-team-data/', marketing_team_data, name='marketing_team_data'),
+    path('marketing-campaigns-data/', marketing_campaigns_data, name='marketing_campaigns_data'),
     path('marketing/member/<int:user_id>/performance/', marketing_member_performance, name='marketing_member_performance'),
+
+    # Tambahkan URL pattern
+    path('api/users/marketing/', get_marketing_users, name='get_marketing_users'),
+    path('api/orders/pending-approval/', get_pending_approval_orders, name='get_pending_approval_orders'),
+    path('api/orders/approve-payment/', approve_order_payment, name='approve_order_payment'),
+    path('api/orders/<int:order_id>/reject/', reject_order, name='reject_order'),
+
+    # Notifications
+    path('notifications/user/', get_user_notifications, name='user-notifications'),
+    path('notifications/<int:notification_id>/read/', mark_notification_read, name='mark-notification-read'),
+
+    # Add simple test endpoint
+    path('api/test-simple/', simple_test_view, name='simple-test'),
 ]
 
 # Error handlers (sudah didefinisikan di settings.py atau di root urls.py)

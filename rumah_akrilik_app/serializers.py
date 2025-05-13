@@ -6,7 +6,7 @@ from .models import (
     CustomerAddress, ProductImage, OrderStatus, ProductionMaterial, Supplier,
     MarketingCampaign, Order, Produksi, Absensi, Product, RealisasiKunjunganRR,
     Role, UserProfile, ProductCategory, OrderItem, ProductionJob, Inventory,
-    Transaction, Customer, ProductionStage, ProductionTracking
+    Transaction, Customer, ProductionStage, ProductionTracking, Notification
 )
 import logging
 from decimal import Decimal, InvalidOperation # Import Decimal dan InvalidOperation
@@ -400,3 +400,15 @@ class AbsensiSerializer(serializers.ModelSerializer):
 # ======================
 class GroupSerializer(serializers.ModelSerializer):
     class Meta: model = Group; fields = ['id', 'name']
+
+# ======================
+# Notification Management
+# ======================
+class NotificationSerializer(serializers.ModelSerializer):
+    """
+    Serializer untuk model Notification
+    """
+    class Meta:
+        model = Notification
+        fields = ['id', 'title', 'message', 'type', 'read', 'created_at', 'updated_at', 'related_id', 'short_message']
+        read_only_fields = ['created_at', 'updated_at', 'short_message']

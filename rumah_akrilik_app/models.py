@@ -1,14 +1,44 @@
 # /root/rumah-akrilik/rumah_akrilik_app/models.py
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AbstractUser
 from django.utils import timezone
 from django.core.validators import MinValueValidator
 from django.core.exceptions import ValidationError
+from django.conf import settings  # Tambahkan import ini
 from decimal import Decimal, InvalidOperation
 
 # ======================
 # User Management
 # ======================
+class CustomUser(AbstractUser):
+    ROLE_CHOICES = (
+        ('admin', 'Admin'),
+        ('produksi', 'Produksi'),
+        ('marketing', 'Marketing'),
+        ('admin_marketing', 'Admin Marketing'),  # Tambahkan role baru
+        ('manager_marketing', 'Manager Marketing'),
+        ('supervisor_marketing', 'Supervisor Marketing'),
+        ('cs_online', 'CS Online'),
+        ('cs_offline', 'CS Offline'),
+        ('retail', 'Retail Representative'),
+        ('general_manager', 'General Manager'),
+        ('owner', 'Owner'),
+    )
+    
+    role = models.CharField(max_length=50, choices=ROLE_CHOICES, default='marketing')
+    groups = models.ManyToManyField(
+        'auth.Group',
+        related_name='customuser_set',  # Tambahkan related_name yang unik
+        blank=True,
+        help_text='The groups this user belongs to.'
+    )
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        related_name='customuser_set',  # Tambahkan related_name yang unik
+        blank=True,
+        help_text='Specific permissions for this user.'
+    )
+
 class Role(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
@@ -424,3 +454,55 @@ class Absensi(models.Model):
     created_at = models.DateTimeField(auto_now_add=True); updated_at = models.DateTimeField(auto_now=True) # noqa: E701
     class Meta: verbose_name = 'Attendance'; verbose_name_plural = 'Attendance Records'; unique_together = ['user', 'tanggal']; ordering = ['-tanggal', 'user'] # noqa: E701
     def __str__(self): return f"{self.user.username} - {self.tanggal}"
+
+# ======================
+# Notification Management
+# ======================
+class Notification(models.Model):
+    """
+    Model untuk menyimpan notifikasi sistem untuk pengguna
+    """
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True, 
+        related_name='notifications',
+        help_text="User yang menerima notifikasi, jika NULL maka untuk semua user dengan role tertentu"
+    )
+    title = models.CharField(max_length=255)
+    message = models.TextField()
+    type = models.CharField(
+        max_length=50, 
+        choices=[
+            ('order_created', 'Order Created'),
+            ('order_updated', 'Order Updated'),
+            ('order_approved', 'Order Approved'),
+            ('payment_received', 'Payment Received'),
+            ('production_started', 'Production Started'),
+            ('production_update', 'Production Update'),
+            ('production_completed', 'Production Completed'),
+            ('order_ready', 'Order Ready'),
+            ('order_delivered', 'Order Delivered'),
+            ('system', 'System Notification'),
+            ('marketing', 'Marketing Notification'),
+        ],
+        default='system'
+    )
+    read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    related_id = models.IntegerField(null=True, blank=True, help_text="ID dari entitas terkait (misal: order_id)")
+    
+    class Meta:
+        ordering = ['-created_at']
+        
+    def __str__(self):
+        return f"{self.title} - {self.created_at.strftime('%d/%m/%Y %H:%M')}"
+    
+    @property
+    def short_message(self):
+        """Return shortened message for display in lists"""
+        if len(self.message) > 100:
+            return f"{self.message[:97]}..."
+        return self.message
