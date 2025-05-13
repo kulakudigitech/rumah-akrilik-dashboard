@@ -46,12 +46,19 @@ from .views import (
     UpdateOrderStatusView, # Pastikan UpdateOrderStatusView sudah diimpor
     get_available_tasks_by_stage, # Pastikan get_available_tasks_by_stage sudah diimpor
     get_my_production_assignments, # Pastikan get_my_production_assignments sudah diimpor
-    claim_production_task
+    claim_production_task,
+    claim_task_alt,
+    marketing_team_data,
+    marketing_performance_data,
+    marketing_member_performance,
+    marketing_campaigns_data
 )
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from .debug_api import test_database_connection, test_order_status, test_production_tracking, test_environment
+# from .views import production_tracking_views
+from .production_tracking import get_available_trackings, claim_task, claim_task_alt, get_my_trackings
 
 # Tambahkan fungsi untuk mendapatkan CSRF token
 @api_view(['GET'])
@@ -124,6 +131,8 @@ urlpatterns = [
     path('marketing/performance/', MarketingPerformanceView.as_view(), name='marketing-performance'),
     path('rr/my-visits/', RRVisitList.as_view(), name='rr-my-visits'),
     path('rr/visit-stats/', RRVisitStatsView.as_view(), name='rr-visit-stats'),
+    path('marketing/performance/', marketing_performance_data, name='marketing_performance_data'),
+    path('marketing/campaigns/', marketing_campaigns_data, name='marketing_campaigns_data'),
 
     # Production (relative path from /api/)
     path('production/status/<int:pk>/', ProductionStatusView.as_view(), name='production-status'),
@@ -201,6 +210,23 @@ urlpatterns = [
 
     # Tambahkan di urlpatterns
     path('debug/update-order-status/<int:order_id>/', UpdateOrderStatusView.as_view(), name='debug-update-order-status'),
+
+    # Production Tracking URLs
+    path('production-trackings/available/', get_available_trackings, name='available_trackings'),
+    path('production-trackings/<int:tracking_id>/', claim_task, name='claim_task'),
+    path('production-tracking/claim/', claim_task_alt, name='claim_task_alt'),
+    path('production-trackings/my-tasks/', get_my_trackings, name='my_trackings'),  # URL baru
+
+    # Tambahkan path alternatif untuk my-tasks (setelah path yang sudah ada)
+    path('production-trackings/my-tasks/', get_my_trackings, name='my_trackings'),  
+    path('production-tracking/my-tasks/', get_my_trackings, name='my_trackings_alt'),  # Alternatif URL
+
+    # Include API URLs
+    # path('api/', include('rumah_akrilik_app.api.urls')),
+
+    # Tambahkan di urls.py
+    path('marketing/team/', marketing_team_data, name='marketing_team_data'),
+    path('marketing/member/<int:user_id>/performance/', marketing_member_performance, name='marketing_member_performance'),
 ]
 
 # Error handlers (sudah didefinisikan di settings.py atau di root urls.py)

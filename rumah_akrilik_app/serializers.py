@@ -177,9 +177,6 @@ class ProductionStageSerializer(serializers.ModelSerializer):
 
 # --- Serializer untuk ProductionTracking ---
 class ProductionTrackingSerializer(serializers.ModelSerializer):
-    stage_name = serializers.CharField(source='stage.name', read_only=True)
-    assigned_to_name = serializers.CharField(source='assigned_to.username', read_only=True)
-    
     class Meta:
         model = ProductionTracking
         fields = '__all__'
@@ -355,9 +352,6 @@ class ProductionStageSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ProductionTrackingSerializer(serializers.ModelSerializer):
-    stage_name = serializers.CharField(source='stage.name', read_only=True)
-    assigned_to_name = serializers.CharField(source='assigned_to.username', read_only=True)
-    
     class Meta:
         model = ProductionTracking
         fields = '__all__'
