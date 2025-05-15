@@ -6,7 +6,8 @@ from .models import (
     CustomerAddress, ProductImage, OrderStatus, ProductionMaterial, Supplier,
     MarketingCampaign, Order, Produksi, Absensi, Product, RealisasiKunjunganRR,
     Role, UserProfile, ProductCategory, OrderItem, ProductionJob, Inventory,
-    Transaction, Customer, ProductionStage, ProductionTracking, Notification
+    Transaction, Customer, ProductionStage, ProductionTracking, Notification,
+    MarketingPlan
 )
 import logging
 from decimal import Decimal, InvalidOperation # Import Decimal dan InvalidOperation
@@ -363,6 +364,16 @@ class MarketingCampaignSerializer(serializers.ModelSerializer):
     created_by = UserSerializer(read_only=True)
     created_by_id = serializers.PrimaryKeyRelatedField( queryset=User.objects.filter(is_active=True), source='created_by', write_only=True )
     class Meta: model = MarketingCampaign; fields = '__all__'; read_only_fields = ['created_at', 'updated_at', 'created_by']
+
+class MarketingPlanSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MarketingPlan
+        fields = [
+            'id', 'name', 'description', 'start_date', 'end_date', 
+            'target_value', 'status', 'responsible_user', 'notes', 
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
 
 class RealisasiKunjunganRRSerializer(serializers.ModelSerializer):
     rr = UserSerializer(read_only=True)

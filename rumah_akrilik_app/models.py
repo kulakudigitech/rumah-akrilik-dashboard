@@ -442,6 +442,35 @@ class RealisasiKunjunganRR(models.Model):
     class Meta: verbose_name = 'RR Visit'; verbose_name_plural = 'RR Visits'; ordering = ['-tanggal'] # noqa: E701
     def __str__(self): return f"Visit by {self.rr.username} to {self.customer.name} - {self.tanggal}"
 
+class MarketingPlan(models.Model):
+    """Model untuk rencana marketing"""
+    name = models.CharField(max_length=200)
+    description = models.TextField(blank=True, null=True)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    target_value = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    responsible_user = models.CharField(max_length=100, blank=True, null=True)
+    STATUS_CHOICES = [
+        ('planned', 'Direncanakan'),
+        ('active', 'Aktif'),
+        ('completed', 'Selesai'),
+        ('cancelled', 'Dibatalkan')
+    ]
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='planned')
+    notes = models.TextField(blank=True, null=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='created_plans')
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='updated_plans')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Marketing Plan'
+        verbose_name_plural = 'Marketing Plans'
+
+    def __str__(self):
+        return f"{self.name} ({self.start_date} - {self.end_date})"
+
 # ======================
 # Attendance (Sama seperti sebelumnya)
 # ======================

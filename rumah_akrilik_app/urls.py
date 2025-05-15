@@ -36,6 +36,11 @@ from .views import (
     update_production_stages,
     ProductionTrackingByOrderView,
     check_user_role_access,
+    hrd_get_users,
+    hrd_get_roles,
+    hrd_dashboard_stats,
+    hrd_get_user_detail,
+    hrd_get_role_detail,
     get_available_roles,
     basic_login_view,
     emergency_login,
@@ -52,6 +57,10 @@ from .views import (
     marketing_performance_data,
     marketing_member_performance,
     marketing_campaigns_data,
+    marketing_target_realization,
+    marketing_plans,
+    marketing_plan_detail,
+    marketing_dashboard_stats,
     get_marketing_users,
     get_pending_approval_orders,
     approve_order_payment,
@@ -181,7 +190,7 @@ urlpatterns = [
     path('dashboard/summary/', DashboardSummaryView.as_view(), name='dashboard-summary'),
     path('dashboard/sales/', SalesDashboardView.as_view(), name='sales-dashboard'),
     path('dashboard/stats/', DashboardStatsView.as_view(), name='dashboard-stats'),
-    # path('dashboard/', DashboardStatsView.as_view(), name='dashboard'),
+    # path('dashboard/', Dashboard.as_view(), name='dashboard'),
 
     # File Handling (relative path from /api/)
     path('files/upload/', FileUploadView.as_view(), name='file-upload'),
@@ -222,6 +231,11 @@ urlpatterns = [
     # User role endpoints
     path('user/check-role/<str:role_name>/', check_user_role_access, name='check-user-role'),
     path('roles/available/', get_available_roles, name='get-available-roles'),
+    path('hrd/users/', hrd_get_users, name='hrd_get_users'),
+    path('hrd/roles/', hrd_get_roles, name='hrd_get_roles'),
+    path('hrd/dashboard/', hrd_dashboard_stats, name='hrd_dashboard_stats'),
+    path('hrd/users/<int:user_id>/', hrd_get_user_detail, name='hrd_get_user_detail'),
+    path('hrd/roles/<int:role_id>/', hrd_get_role_detail, name='hrd_get_role_detail'),
 
     # Tambahkan di urlpatterns
     path('debug/update-order-status/<int:order_id>/', UpdateOrderStatusView.as_view(), name='debug-update-order-status'),
@@ -243,19 +257,28 @@ urlpatterns = [
     path('marketing-team-data/', marketing_team_data, name='marketing_team_data'),
     path('marketing-campaigns-data/', marketing_campaigns_data, name='marketing_campaigns_data'),
     path('marketing/member/<int:user_id>/performance/', marketing_member_performance, name='marketing_member_performance'),
+    path('marketing/performance-data/', marketing_performance_data, name='marketing-performance-data'),
+    path('marketing/target-realization/', marketing_target_realization, name='marketing-target-realization'),
+    path('marketing/plans/', marketing_plans, name='marketing-plans'),
+    path('marketing/plans/<int:pk>/', marketing_plan_detail, name='marketing-plan-detail'),
+    path('marketing/dashboard-stats/', marketing_dashboard_stats, name='marketing-dashboard-stats'),
+
+    # Marketing routes yang diedit
+    path('users/marketing/', get_marketing_users, name='marketing_users'),
+    path('marketing/member-performance/<int:user_id>/', marketing_member_performance, name='marketing_member_performance'),
+    path('marketing/campaigns/', marketing_campaigns_data, name='marketing_campaigns_alt'),
 
     # Tambahkan URL pattern
-    path('api/users/marketing/', get_marketing_users, name='get_marketing_users'),
-    path('api/orders/pending-approval/', get_pending_approval_orders, name='get_pending_approval_orders'),
-    path('api/orders/approve-payment/', approve_order_payment, name='approve_order_payment'),
-    path('api/orders/<int:order_id>/reject/', reject_order, name='reject_order'),
+    path('orders/pending-approval/', get_pending_approval_orders, name='get_pending_approval_orders'),
+    path('orders/approve-payment/', approve_order_payment, name='approve_order_payment'),
+    path('orders/<int:order_id>/reject/', reject_order, name='reject_order'),
 
     # Notifications
     path('notifications/user/', get_user_notifications, name='user-notifications'),
     path('notifications/<int:notification_id>/read/', mark_notification_read, name='mark-notification-read'),
 
     # Add simple test endpoint
-    path('api/test-simple/', simple_test_view, name='simple-test'),
+    path('test-simple/', simple_test_view, name='simple-test'),
 ]
 
 # Error handlers (sudah didefinisikan di settings.py atau di root urls.py)
