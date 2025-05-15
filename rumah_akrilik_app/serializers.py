@@ -7,7 +7,7 @@ from .models import (
     MarketingCampaign, Order, Produksi, Absensi, Product, RealisasiKunjunganRR,
     Role, UserProfile, ProductCategory, OrderItem, ProductionJob, Inventory,
     Transaction, Customer, ProductionStage, ProductionTracking, Notification,
-    MarketingPlan
+    MarketingPlan, Department
 )
 import logging
 from decimal import Decimal, InvalidOperation # Import Decimal dan InvalidOperation
@@ -36,9 +36,7 @@ class RoleSerializer(serializers.ModelSerializer):
 # Update serializer UserProfileSerializer
 class UserProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
-    # Tambahkan roles serializer
     roles = RoleSerializer(many=True, read_only=True)
-    # Tambahkan field untuk menerima daftar ID role saat update
     role_ids = serializers.ListField(
         child=serializers.IntegerField(),
         write_only=True,
@@ -47,9 +45,12 @@ class UserProfileSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = UserProfile
-        fields = ['id', 'user', 'roles', 'phone', 'address', 'avatar', 
-                  'job_title', 'department', 'notes', 'tipe_karyawan', 
-                  'is_active', 'created_at', 'updated_at', 'role_ids']
+        fields = [
+            'id', 'user', 'roles', 'phone', 'address', 'photo',  # Changed 'avatar' to 'photo' 
+            'department', 'tipe_karyawan', 
+            'is_active', 'created_at', 'updated_at', 'role_ids',
+            'join_date'  # Added this field
+        ]
     
     def update(self, instance, validated_data):
         # Handle role_ids separately
@@ -423,3 +424,25 @@ class NotificationSerializer(serializers.ModelSerializer):
         model = Notification
         fields = ['id', 'title', 'message', 'type', 'read', 'created_at', 'updated_at', 'related_id', 'short_message']
         read_only_fields = ['created_at', 'updated_at', 'short_message']
+
+# ======================
+# HRD Department Management
+# ======================
+class DepartmentSerializer(serializers.ModelSerializer):
+    manager_name = serializers.SerializerMethodField()
+    user_count = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Department
+        fields = ['id', 'name', 'description', 'manager', 'manager_id', 'manager_name', 
+                  'parent_department', 'parent_department_id', 'location', 
+                  'is_active', 'created_at', 'updated_at', 'user_count']
+        read_only_fields = ['manager_name', 'user_count']
+        
+    def get_manager_name(self, obj):
+        if obj.manager:
+            return f"{obj.manager.first_name} {obj.manager.last_name}".strip() or obj.manager.username
+        return None
+    
+    def get_user_count(self, obj):
+        return obj.users.count() if hasattr(obj, 'users') else 0

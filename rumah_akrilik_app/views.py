@@ -49,7 +49,7 @@ from .models import (
     Role, UserProfile, ProductCategory, OrderItem, ProductionJob, Inventory,
     Transaction, Customer, ProductionStage, ProductionTracking, CustomUser,
     Notification, Product, MarketingCampaign, Produksi, Absensi, RealisasiKunjunganRR,
-    MarketingPlan  # Tambahkan ini
+    MarketingPlan, Department, UserProfile # Tambahkan ini
 )
 
 # Add to top of views.py file
@@ -65,7 +65,8 @@ from .serializers import (
     UserSerializer, ProductCategorySerializer, OrderItemSerializer,
     ProductionJobSerializer, InventorySerializer, TransactionSerializer,
     GroupSerializer, CustomerSerializer, OrderListSerializer,
-    ProductionStageSerializer, ProductionTrackingSerializer, NotificationSerializer
+    ProductionStageSerializer, ProductionTrackingSerializer, NotificationSerializer,
+    DepartmentSerializer
 )
 
 # --- Import Custom Permissions ---
@@ -599,11 +600,11 @@ class RoleViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminUser] # Hanya Admin Django Superuser
 
 class UserProfileViewSet(viewsets.ModelViewSet):
-    queryset = UserProfile.objects.select_related('user', 'role').filter(is_active=True)
+    queryset = UserProfile.objects.select_related('user').all()
     serializer_class = UserProfileSerializer
-    permission_classes = [IsAuthenticated] # Izinkan user terautentikasi melihat
+    permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_fields = ['role', 'is_active', 'tipe_karyawan']
+    filterset_fields = ['roles', 'department', 'tipe_karyawan']  # Remove is_active
     search_fields = ['user__username', 'phone', 'address']
     pagination_class = CustomPagination
 
@@ -1977,11 +1978,10 @@ def marketing_campaigns_data(request):
             for date_field in ['start_date', 'end_date']:
                 if date_field in campaign_data:
                     try:
-                        # Pastikan format tanggal valid
-                        parse_date(campaign_data[date_field])
+                        datetime.strptime(campaign_data[date_field], '%Y-%m-%d')
                     except ValueError:
                         return Response(
-                            {"detail": f"Format tanggal {date_field} tidak valid. Gunakan format YYYY-MM-DD"}, 
+                            {"detail": f"Format {date_field} tidak valid. Gunakan format YYYY-MM-DD"}, 
                             status=status.HTTP_400_BAD_REQUEST
                         )
             
@@ -2273,11 +2273,11 @@ def marketing_target_realization(request):
             elif i + 1 == current_month:
                 # Current month: 0-100% of target based on day of month
                 current_day = now.day
-                max_days = calendar.monthrange(current_year, current_month)[1]
-                progress_percentage = min(100, (current_day / max_days) * 100)
-                realization = targets[i] * ((random.randint(60, 100) * progress_percentage) / 10000)
+                days_in_month = calendar.monthrange(now.year, now.month)[1]
+                progress_percentage = min(current_day / days_in_month, 1.0)
+                realization = targets[i] * progress_percentage * (random.randint(80, 100) / 100)
             else:
-                # Future month: No realization
+                # Future month: 0% of target
                 realization = 0
             realizations.append(round(realization))
         
@@ -2476,40 +2476,8 @@ def marketing_dashboard_stats(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def hrd_get_users(request):
-    """
-    API endpoint khusus untuk HRD untuk mendapatkan daftar seluruh pengguna
-    """
-    # Periksa apakah pengguna memiliki role yang sesuai (HRD, admin, atau owner)
     try:
-        user_roles = []
-        if hasattr(request.user, 'roles'):
-            user_roles = [role.name.lower() for role in request.user.roles.all()]
-        elif hasattr(request.user, 'role') and request.user.role:
-            user_roles = [request.user.role.lower()]
-        
-        # Special check for superusers and staff
-        if request.user.is_superuser or request.user.is_staff:
-            user_roles.append('admin')
-            
-        allowed_roles = ['hrd', 'admin', 'owner', 'manager_hrd', 'hr officer', 'general_manager']
-        
-        if not any(role in allowed_roles for role in user_roles) and not request.user.is_superuser:
-            return Response(
-                {"detail": "Anda tidak memiliki izin untuk mengakses data ini."},
-                status=status.HTTP_403_FORBIDDEN
-            )
-    except Exception as e:
-        # For debugging, log the exception
-        print(f"Error checking roles: {e}")
-        # For superusers, allow access anyway
-        if not request.user.is_superuser:
-            return Response(
-                {"detail": "Terjadi kesalahan saat memeriksa izin. Silakan coba lagi."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-    
-    try:
-        # Get all User objects with related UserProfiles
+        # Get all User objects
         users = User.objects.filter(is_active=True).order_by('username')
         
         # Format data for frontend
@@ -2517,41 +2485,34 @@ def hrd_get_users(request):
         for user in users:
             try:
                 # Try to get user profile
-                profile = None
-                try:
-                    if hasattr(user, 'userprofile'):
-                        profile = user.userprofile
-                except:
-                    profile = None
+                profile = UserProfile.objects.filter(user=user).first()
                 
-                # Try to get role
-                role = None
-                try:
-                    if profile and profile.role:
-                        role = {"id": profile.role.id, "name": profile.role.name}
-                    elif hasattr(user, 'roles') and user.roles.exists():
-                        first_role = user.roles.first()
-                        role = {"id": first_role.id, "name": first_role.name}
-                except:
-                    role = None
+                # Get role info
+                role_info = None
+                if profile and hasattr(profile, 'role') and profile.role:
+                    role_info = {"id": profile.role.id, "name": profile.role.name}
+                elif profile and hasattr(profile, 'roles') and profile.roles.exists():
+                    first_role = profile.roles.first()
+                    role_info = {"id": first_role.id, "name": first_role.name}
                 
-                # Get phone from profile if available
-                phone = None
-                if profile and hasattr(profile, 'phone_number'):
-                    phone = profile.phone_number
-                elif profile and hasattr(profile, 'phone'):
-                    phone = profile.phone
+                # Get department info
+                department_info = None
+                if profile and hasattr(profile, 'department') and profile.department:
+                    department_info = {
+                        "id": profile.department.id,
+                        "name": profile.department.name
+                    }
                 
                 user_data.append({
                     "id": user.id,
                     "username": user.username,
-                    "email": user.email,
-                    "first_name": user.first_name,
-                    "last_name": user.last_name,
-                    "role": role,
+                    "email": user.email or "",
+                    "first_name": user.first_name or "",
+                    "last_name": user.last_name or "",
+                    "role": role_info,
                     "is_active": user.is_active,
-                    "phone": phone,
-                    "department": profile.department if profile and hasattr(profile, 'department') else None,
+                    "phone": profile.phone if profile and hasattr(profile, 'phone') else "",
+                    "department": department_info
                 })
             except Exception as e:
                 print(f"Error processing user {user.username}: {e}")
@@ -2559,34 +2520,29 @@ def hrd_get_users(request):
                 user_data.append({
                     "id": user.id,
                     "username": user.username,
-                    "email": user.email,
-                    "first_name": user.first_name,
-                    "last_name": user.last_name,
-                    "role": None,
-                    "is_active": user.is_active,
-                    "phone": None,
+                    "email": user.email or "",
+                    "first_name": user.first_name or "",
+                    "last_name": user.last_name or "",
+                    "is_active": user.is_active
                 })
         
+        print(f"Returning {len(user_data)} users")
         return Response(user_data)
     except Exception as e:
-        # Log the error
-        print(f"Error retrieving users: {e}")
-        # Return dummy data
+        print(f"Error in hrd_get_users: {e}")
         return Response([
             {
                 "id": 1,
-                "username": "mbotee",
+                "username": "admin",
                 "email": "admin@rumahakrilik.id",
-                "first_name": "Muhammad",
-                "last_name": "Botee",
-                "role": {"id": 1, "name": "owner"},
+                "first_name": "Admin",
+                "last_name": "User",
+                "role": {"id": 1, "name": "Admin"},
                 "is_active": True,
-                "phone": "081234567890",
-                "department": "Management"
-            },
-            # Add more dummy users as needed
+                "department": {"id": 1, "name": "Management"}
+            }
         ])
-
+    
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def hrd_get_roles(request):
@@ -2777,49 +2733,33 @@ def hrd_dashboard_stats(request):
 @api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def hrd_get_user_detail(request, user_id):
-    """
-    API endpoint khusus untuk HRD untuk mendapatkan/update/delete detail pengguna tertentu
-    """
     try:
-        # Dapatkan user dengan ID yang diminta
         user = User.objects.get(id=user_id)
-        
-        # GET - Retrieve user detail
+        user_profile, created = UserProfile.objects.get_or_create(user=user)
+
         if request.method == 'GET':
-            # Coba dapatkan profile user
-            try:
-                profile = UserProfile.objects.get(user=user)
-            except UserProfile.DoesNotExist:
-                profile = None
-                
-            # Dapatkan role
-            role = None
-            if profile and profile.role:
-                role = {"id": profile.role.id, "name": profile.role.name}
-            elif hasattr(user, 'roles') and user.roles.exists():
-                first_role = user.roles.first()
-                role = {"id": first_role.id, "name": first_role.name}
-            
-            # Dapatkan data lengkap user
-            user_data = {
+            # Always return consistent structure even if values are None
+            return Response({
                 "id": user.id,
                 "username": user.username,
                 "email": user.email,
                 "first_name": user.first_name,
                 "last_name": user.last_name,
-                "role": role,
                 "is_active": user.is_active,
-                "phone": profile.phone_number if profile and hasattr(profile, 'phone_number') else None,
-                "department": profile.department if profile and hasattr(profile, 'department') else None,
-                "joining_date": profile.joining_date.strftime('%Y-%m-%d') if profile and hasattr(profile, 'joining_date') and profile.joining_date else None,
+                "role": {
+                    "id": user_profile.role.id if hasattr(user_profile, 'role') and user_profile.role else None,
+                    "name": user_profile.role.name if hasattr(user_profile, 'role') and user_profile.role else None
+                } if hasattr(user_profile, 'role') else None,
+                "phone": user_profile.phone if hasattr(user_profile, 'phone') else None,
+                "department": {
+                    "id": user_profile.department.id if user_profile.department else None,
+                    "name": user_profile.department.name if user_profile.department else None
+                } if hasattr(user_profile, 'department') else None,
+                "joining_date": user_profile.joining_date.strftime('%Y-%m-%d') if user_profile.joining_date else None,
                 "last_login": user.last_login.strftime('%Y-%m-%d %H:%M:%S') if user.last_login else None
-            }
-            
-            return Response(user_data)
-            
-        # PUT and PATCH - Update user
+            })
+
         elif request.method in ['PUT', 'PATCH']:
-            # Update user data
             if 'first_name' in request.data:
                 user.first_name = request.data['first_name']
             if 'last_name' in request.data:
@@ -2828,28 +2768,47 @@ def hrd_get_user_detail(request, user_id):
                 user.email = request.data['email']
             if 'is_active' in request.data:
                 user.is_active = request.data['is_active']
-            
-            # Change password if provided
             if 'password' in request.data and request.data['password']:
                 user.set_password(request.data['password'])
-                
             user.save()
-            
-            # Update or create user profile
-            user_profile, created = UserProfile.objects.get_or_create(user=user)
-            
-            if 'phone' in request.data:
-                user_profile.phone_number = request.data['phone']
-            
+
+            if 'phone' in request.data and request.data['phone']:
+                user_profile.phone = request.data['phone']
+
             if 'role_id' in request.data and request.data['role_id']:
                 try:
                     role = Role.objects.get(id=request.data['role_id'])
                     user_profile.role = role
                 except Role.DoesNotExist:
                     pass
-                
+
+            if 'department_id' in request.data:
+                try:
+                    department_id = request.data['department_id']
+                    if department_id:
+                        department = Department.objects.get(id=department_id)
+                        user_profile.department = department
+                    else:
+                        user_profile.department = None
+                except Department.DoesNotExist:
+                    user_profile.department = None
+
             user_profile.save()
-            
+
+            role_data = None
+            if user_profile.role:
+                role_data = {
+                    "id": user_profile.role.id,
+                    "name": user_profile.role.name
+                }
+
+            department_data = None
+            if user_profile.department:
+                department_data = {
+                    "id": user_profile.department.id,
+                    "name": user_profile.department.name
+                }
+
             return Response({
                 "id": user.id,
                 "username": user.username,
@@ -2857,21 +2816,19 @@ def hrd_get_user_detail(request, user_id):
                 "first_name": user.first_name,
                 "last_name": user.last_name,
                 "is_active": user.is_active,
-                "role": {"id": user_profile.role.id if user_profile.role else None,
-                         "name": user_profile.role.name if user_profile.role else None},
-                "phone": user_profile.phone_number,
-                "department": user_profile.department,
+                "role": role_data,
+                "phone": user_profile.phone if hasattr(user_profile, 'phone') else None,
+                "department": department_data,
                 "message": "User updated successfully"
             })
-            
-        # DELETE - Delete user
+
         elif request.method == 'DELETE':
             username = user.username
             user.delete()
             return Response({
                 "message": f"User {username} deleted successfully"
             })
-            
+
     except User.DoesNotExist:
         return Response({"detail": f"User dengan ID {user_id} tidak ditemukan."}, status=404)
     except Exception as e:
@@ -2914,3 +2871,218 @@ def hrd_get_role_detail(request, role_id):
     except Exception as e:
         print(f"Error in hrd_get_role_detail: {e}")
         return Response({"detail": str(e)}, status=500)
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def hrd_update_user_role(request, user_id):
+    """
+    API endpoint khusus untuk update role pengguna
+    """
+    try:
+        user = User.objects.get(id=user_id)
+        user_profile, created = UserProfile.objects.get_or_create(user=user)
+        
+        if 'role_id' in request.data and request.data['role_id']:
+            try:
+                role_id = int(request.data['role_id'])
+                role = Role.objects.get(id=role_id)
+                user_profile.role = role
+                user_profile.save()
+                
+                return Response({
+                    "message": "Role berhasil diupdate",
+                    "role": {
+                        "id": role.id,
+                        "name": role.name
+                    }
+                })
+            except (Role.DoesNotExist, ValueError) as e:
+                return Response({"detail": f"Role tidak valid: {str(e)}"}, status=400)
+        else:
+            return Response({"detail": "role_id tidak disertakan dalam request"}, status=400)
+    except User.DoesNotExist:
+        return Response({"detail": f"User dengan ID {user_id} tidak ditemukan."}, status=404)
+    except Exception as e:
+        print(f"Error in hrd_update_user_role: {e}")
+        return Response({"detail": str(e)}, status=500)
+
+# Department List/Create endpoint
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def department_list_create(request):
+    """List all departments or create a new one"""
+    if request.method == 'GET':
+        departments = Department.objects.all()
+        data = []
+        for dept in departments:
+            data.append({
+                'id': dept.id,
+                'name': dept.name,
+                'description': dept.description,
+                'manager_id': dept.manager_id,
+                'manager_name': dept.manager.get_full_name() if dept.manager else None,
+                'parent_department_id': dept.parent_department_id,
+                'location': dept.location,
+                'is_active': dept.is_active,
+                'user_count': UserProfile.objects.filter(department=dept).count()
+            })
+        return Response(data)
+    
+    elif request.method == 'POST':
+        print("Creating department with data:", request.data)
+        try:
+            name = request.data.get('name')
+            description = request.data.get('description', '')
+            manager_id = request.data.get('manager_id')
+            parent_department_id = request.data.get('parent_department_id')
+            location = request.data.get('location', '')
+            is_active = request.data.get('is_active', True)
+            
+            # Create the department
+            dept = Department(
+                name=name,
+                description=description,
+                manager_id=manager_id if manager_id else None,
+                parent_department_id=parent_department_id if parent_department_id else None,
+                location=location,
+                is_active=is_active
+            )
+            dept.save()
+            
+            # Return the created department
+            return Response({
+                'id': dept.id,
+                'name': dept.name,
+                'description': dept.description,
+                'manager_id': dept.manager_id,
+                'manager_name': dept.manager.get_full_name() if dept.manager else None,
+                'parent_department_id': dept.parent_department_id,
+                'location': dept.location,
+                'is_active': dept.is_active,
+                'user_count': 0
+            }, status=201)
+        except Exception as e:
+            print("Error creating department:", str(e))
+            return Response({'detail': str(e)}, status=400)
+
+# Department Detail endpoint
+@api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def department_detail(request, pk):
+    """Retrieve, update or delete a department"""
+    try:
+        department = Department.objects.get(pk=pk)
+    except Department.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method == 'GET':
+        serializer = DepartmentSerializer(department)
+        return Response(serializer.data)
+    
+    elif request.method == 'PUT':
+        serializer = DepartmentSerializer(department, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    elif request.method == 'DELETE':
+        department.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def department_users(request, pk):
+    """Get all users in a department"""
+    try:
+        users = UserProfile.objects.filter(department_id=pk).select_related('user')
+        data = []
+        
+        for profile in users:
+            user = profile.user
+            role_name = 'Staff'
+            if hasattr(profile, 'roles') and profile.roles.exists():
+                role_name = profile.roles.first().name
+            
+            data.append({
+                'id': user.id,
+                'username': user.username,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'email': user.email,
+                'is_active': user.is_active,
+                'role': {'name': role_name},
+                'joining_date': profile.join_date.strftime('%Y-%m-%d') if profile.join_date else None,
+                'phone': profile.phone,
+                'address': profile.address,
+                'department': profile.department.name if profile.department else None
+                # Removed duplicate joining_date field
+            })
+        return Response(data)
+    except Exception as e:
+        # Add better error logging
+        import traceback
+        print(f"Error in department_users: {str(e)}")
+        print(traceback.format_exc())  
+        return Response({'error': str(e)}, status=500)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def hrd_dashboard_data(request):
+    try:
+        # Get all departments
+        departments = Department.objects.all()
+        department_data = []
+        
+        for dept in departments:
+            department_data.append({
+                'id': dept.id,
+                'name': dept.name,
+                'description': dept.description,
+                'manager_name': dept.manager.get_full_name() if dept.manager else None,
+                'user_count': UserProfile.objects.filter(department=dept).count()
+            })
+        
+        # Get user statistics
+        total_users = User.objects.filter(is_active=True).count()
+        users_by_role = []
+        
+        # Get roles statistics (if roles are in UserProfile)
+        try:
+            from django.db.models import Count
+            roles_data = UserProfile.objects.values('roles__name').annotate(count=Count('id'))
+            
+            for role_data in roles_data:
+                if role_data['roles__name']:  # Filter out None values
+                    users_by_role.append({
+                        'role': role_data['roles__name'],
+                        'count': role_data['count'],
+                        'total': role_data['count']  # Adding total field explicitly
+                    })
+        except Exception as e:
+            print(f"Error getting roles data: {e}")
+            # Provide fallback data with the expected structure
+            users_by_role = [
+                {'role': 'Default', 'count': total_users, 'total': total_users}
+            ]
+        
+        return Response({
+            'departments': department_data,
+            'user_stats': {
+                'total': total_users or 0,  # Ensure it's never null
+                'by_role': users_by_role or []  # Ensure it's never null
+            },
+            'status': 'success'
+        })
+    except Exception as e:
+        print(f"Error in HRD dashboard: {e}")
+        # Return fallback data with complete structure
+        return Response({
+            'departments': [],
+            'user_stats': {
+                'total': 0,
+                'by_role': [{'role': 'Default', 'count': 0, 'total': 0}]  # Empty but valid structure
+            },
+            'status': 'error',
+            'detail': str(e)
+        }, status=200)  # Return 200 with fallback data instead of error status

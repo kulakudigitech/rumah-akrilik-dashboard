@@ -39,31 +39,69 @@ class CustomUser(AbstractUser):
         help_text='Specific permissions for this user.'
     )
 
+# Add this above the UserProfile class
+class Department(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True, null=True)
+    manager = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='managed_departments')
+    parent_department = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='child_departments')
+    location = models.CharField(max_length=200, blank=True, null=True)  # Add this field if missing
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        app_label = 'rumah_akrilik_app'
+        ordering = ['name']
+        verbose_name = 'Department'
+        verbose_name_plural = 'Departments'
+
+    def __str__(self):
+        return self.name
+
 class Role(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    class Meta: ordering = ['name']; verbose_name = 'Role'; verbose_name_plural = 'Roles' # noqa: E701
-    def __str__(self): return self.name
+    
+    class Meta:
+        app_label = 'rumah_akrilik_app'  # Explicitly set the app_label
+        ordering = ['name']
+        verbose_name = 'Role'
+        verbose_name_plural = 'Roles'
+    
+    def __str__(self):
+        return self.name
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     roles = models.ManyToManyField(Role, related_name='users', blank=True)
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True, related_name='users')
     phone = models.CharField(max_length=20, blank=True)
-    address = models.TextField(blank=True) # Alamat utama user
+    address = models.TextField(blank=True)
     join_date = models.DateField(default=timezone.now)
     photo = models.ImageField(upload_to='profile_photos/', null=True, blank=True)
     is_active = models.BooleanField(default=True)
-    TIPE_KARYAWAN_CHOICES = [ ('tetap', 'Karyawan Tetap'), ('freelance', 'Freelance'), ('magang', 'Magang'), ('pkl', 'PKL'), ('trainee','Trainee') ] # noqa: E701
-    tipe_karyawan = models.CharField(max_length=20, choices=TIPE_KARYAWAN_CHOICES, default='tetap', blank=False, null=False) # noqa: E701
+    TIPE_KARYAWAN_CHOICES = [
+        ('tetap', 'Karyawan Tetap'),
+        ('freelance', 'Freelance'),
+        ('magang', 'Magang'),
+        ('pkl', 'PKL'),
+        ('trainee','Trainee')
+    ]
+    tipe_karyawan = models.CharField(max_length=20, choices=TIPE_KARYAWAN_CHOICES, default='tetap')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    class Meta: ordering = ['user__username']; verbose_name = 'User Profile'; verbose_name_plural = 'User Profiles' # noqa: E701
-    def __str__(self): # noqa: E701
-        try: role_names = ", ".join(role.name for role in self.roles.all())
-        except: role_names = "Tanpa Role" # noqa: E722
+    
+    class Meta:
+        app_label = 'rumah_akrilik_app'  # Explicitly set the app_label
+        ordering = ['user__username']
+        verbose_name = 'User Profile'
+        verbose_name_plural = 'User Profiles'
+
+    def __str__(self): # noqa: E701        
         user_name = self.user.get_full_name() or self.user.username
         try: tipe_display = self.get_tipe_karyawan_display()
         except AttributeError: tipe_display = "N/A" # noqa: E722
@@ -535,3 +573,4 @@ class Notification(models.Model):
         if len(self.message) > 100:
             return f"{self.message[:97]}..."
         return self.message
+    

@@ -8,6 +8,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from .models import (
+    Department,
     Role,
     UserProfile,
     ProductCategory,
@@ -30,33 +31,41 @@ from .models import (
     # Pastikan semua model yang diregister di bawah sudah diimpor di sini
 )
 
+class DepartmentAdmin(admin.ModelAdmin):
+    list_display = ['name', 'description', 'manager', 'is_active']
+    list_filter = ['is_active']
+    search_fields = ['name', 'description']
+
+admin.site.register(Department, DepartmentAdmin)
+
 # Common Admin Mixin (Asumsi class ini ada di kode asli Anda)
 class BaseAdmin(admin.ModelAdmin):
     list_per_page = 50
     save_on_top = True
 
 # User Management
-@admin.register(Role)
-class RoleAdmin(BaseAdmin):
-    list_display = ('name', 'description')
-    search_fields = ('name',)
-    list_filter = ('name',)
-    readonly_fields = ()
+class RoleAdmin(admin.ModelAdmin):
+    list_display = ['name', 'description', 'is_active']
+    list_filter = ['is_active']
+    search_fields = ['name', 'description']
 
-@admin.register(UserProfile)
+admin.site.register(Role, RoleAdmin)
+
 class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ['user', 'display_roles', 'phone', 'is_active']
-    list_filter = ['is_active', 'roles']  # Gunakan 'roles' sebagai ManyToManyField
-    search_fields = ['user__username', 'user__email', 'phone', 'address']
+    list_display = ['get_username', 'get_roles', 'phone', 'is_active']
+    list_filter = ['is_active', 'roles']
     raw_id_fields = ['user']
-    filter_horizontal = ['roles']  # Gunakan filter_horizontal untuk ManyToManyField
+    filter_horizontal = ['roles']
     
-    def display_roles(self, obj):
-        """Display all roles as a comma-separated string"""
-        if obj.roles.exists():
-            return ", ".join([role.name for role in obj.roles.all()])
-        return "-"
-    display_roles.short_description = "Roles"
+    def get_username(self, obj):
+        return obj.user.username if obj.user else ""
+    get_username.short_description = 'Username'
+    
+    def get_roles(self, obj):
+        return ", ".join([role.name for role in obj.roles.all()]) if obj.roles.exists() else ""
+    get_roles.short_description = 'Roles'
+
+admin.site.register(UserProfile, UserProfileAdmin)
 
 # Product Management
 @admin.register(ProductCategory)

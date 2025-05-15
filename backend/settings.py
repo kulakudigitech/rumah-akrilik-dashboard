@@ -63,8 +63,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
-    'django_filters',
-    'rumah_akrilik_app',
+    'django_filters',    
+    'rumah_akrilik_app.apps.RumahAkrilikAppConfig',
     # pastikan semua app terdaftar
 ]
 
