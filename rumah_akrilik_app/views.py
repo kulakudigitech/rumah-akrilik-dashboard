@@ -47,9 +47,10 @@ import calendar
 from .models import (
     CustomerAddress, ProductImage, OrderStatus, ProductionMaterial, Supplier,
     Role, UserProfile, ProductCategory, OrderItem, ProductionJob, Inventory,
+    InventoryTransaction, InventoryRequest,
     Transaction, Customer, ProductionStage, ProductionTracking, CustomUser,
     Notification, Product, MarketingCampaign, Produksi, Absensi, RealisasiKunjunganRR,
-    MarketingPlan, Department, UserProfile # Tambahkan ini
+    MarketingPlan, Department, UserProfile, Asset # Tambahkan ini
 )
 
 # Add to top of views.py file
@@ -63,10 +64,11 @@ from .serializers import (
     OrderSerializer, ProduksiSerializer, AbsensiSerializer, ProductSerializer,
     RealisasiKunjunganRRSerializer, RoleSerializer, UserProfileSerializer,
     UserSerializer, ProductCategorySerializer, OrderItemSerializer,
-    ProductionJobSerializer, InventorySerializer, TransactionSerializer,
+    ProductionJobSerializer, InventorySerializer,
+    InventoryTransactionSerializer, InventoryRequestSerializer, TransactionSerializer,
     GroupSerializer, CustomerSerializer, OrderListSerializer,
     ProductionStageSerializer, ProductionTrackingSerializer, NotificationSerializer,
-    DepartmentSerializer
+    DepartmentSerializer, AssetSerializer
 )
 
 # --- Import Custom Permissions ---
@@ -1216,35 +1218,132 @@ class MarketingCampaignViewSet(viewsets.ModelViewSet):
         return queryset
 
 class InventoryViewSet(viewsets.ModelViewSet):
-    """ViewSet untuk manajemen inventori"""
-    queryset = Inventory.objects.all().order_by('-last_updated')  # Ubah dari updated_at ke last_updated
+    queryset = Inventory.objects.all()
     serializer_class = InventorySerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = InventoryFilter
-    search_fields = ['item_name', 'item_code', 'category', 'location']
-    ordering_fields = ['item_name', 'quantity', 'created_at', 'last_updated']  # Ubah updated_at ke last_updated
+    search_fields = ['name', 'sku', 'category', 'location']
+    ordering_fields = ['name', 'current_stock', 'created_at', 'updated_at']
     pagination_class = CustomPagination
 
-    def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user)
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
         
-    def get_queryset(self):
-        """Filter berdasarkan role jika diperlukan"""
-        queryset = super().get_queryset()
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
         
-        # Jika menggunakan sistem role custom, tambahkan filter sesuai kebutuhan
-        user = self.request.user
-        if hasattr(user, 'role') and user.role == 'inventory':
-            # Inventory staff bisa melihat semua
-            return queryset
-        elif hasattr(user, 'role') and user.role in ['manager', 'general_manager', 'owner']:
-            # Manager ke atas bisa melihat semua
-            return queryset
-            
-        # Peran lainnya mungkin terbatas melihat tertentu saja
-        return queryset
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)  # Selalu mengembalikan array
     
+    # GET /api/inventory/low-stock/
+    @action(detail=False, methods=['get'])
+    def low_stock(self, request):
+        low_stock_items = Inventory.objects.filter(current_stock__lte=F('minimum_stock'))
+        serializer = self.get_serializer(low_stock_items, many=True)
+        return Response(serializer.data)  # Selalu mengembalikan array
+
+class InventoryTransactionViewSet(viewsets.ModelViewSet):
+    queryset = InventoryTransaction.objects.all().order_by('-timestamp')
+    serializer_class = InventoryTransactionSerializer
+    permission_classes = [IsAuthenticated]
+    
+    # GET /api/inventory/transactions/recent/
+    @action(detail=False, methods=['get'])
+    def recent(self, request):
+        """Get recent movement transactions"""
+        recent_movements = InventoryTransaction.objects.all().order_by('-timestamp')[:50]
+        serializer = self.get_serializer(recent_movements, many=True)
+        return Response(serializer.data)
+    
+    # POST /api/inventory/transactions/
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        # Update inventory stock
+        inventory_id = serializer.validated_data.get('inventory').id
+        inventory = Inventory.objects.get(id=inventory_id)
+        
+        transaction_type = serializer.validated_data.get('type')
+        quantity = serializer.validated_data.get('quantity')
+        
+        if transaction_type == 'in':
+            inventory.current_stock += quantity
+        elif transaction_type == 'out':
+            if inventory.current_stock < quantity:
+                return Response(
+                    {'error': 'Stok tidak mencukupi untuk transaksi keluar'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            inventory.current_stock -= quantity
+        
+        inventory.save()
+        
+        # Save transaction
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+class InventoryRequestViewSet(viewsets.ModelViewSet):
+    queryset = InventoryRequest.objects.all().order_by('-request_date')
+    serializer_class = InventoryRequestSerializer
+    permission_classes = [IsAuthenticated]
+    
+    # GET /api/inventory/requests/pending/
+    @action(detail=False, methods=['get'])
+    def pending(self, request):
+        """Get pending inventory requests"""
+        pending_requests = InventoryRequest.objects.filter(status='pending').order_by('-request_date')
+        serializer = self.get_serializer(pending_requests, many=True)
+        return Response(serializer.data)
+    
+    # POST /api/inventory/requests/{id}/approve/
+    @action(detail=True, methods=['post'])
+    def approve(self, request, pk=None):
+        """Approve a pending inventory request"""
+        inventory_request = self.get_object()
+        
+        if inventory_request.status != 'pending':
+            return Response(
+                {'error': 'Hanya permintaan dengan status menunggu yang dapat disetujui'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Update inventory
+        inventory = inventory_request.inventory
+        if inventory.current_stock < inventory_request.quantity:
+            return Response(
+                {'error': 'Stok tidak mencukupi untuk menyetujui permintaan ini'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Update request status
+        inventory_request.status = 'approved'
+        inventory_request.approved_date = timezone.now()
+        inventory_request.approved_by = request.user.username
+        inventory_request.save()
+        
+        # Create transaction record
+        InventoryTransaction.objects.create(
+            inventory=inventory,
+            item_name=inventory.name,
+            type='out',
+            quantity=inventory_request.quantity,
+            reference=f"Permintaan #{inventory_request.id}",
+            requested_by=inventory_request.requested_by,
+            handled_by=request.user.username
+        )
+        
+        # Update inventory stock
+        inventory.current_stock -= inventory_request.quantity
+        inventory.save()
+        
+        serializer = self.get_serializer(inventory_request)
+        return Response(serializer.data)
+
 # Tambahkan kode berikut setelah InventoryViewSet
 class TransactionViewSet(viewsets.ModelViewSet):
     """ViewSet untuk transaksi inventori"""
@@ -3086,3 +3185,28 @@ def hrd_dashboard_data(request):
             'status': 'error',
             'detail': str(e)
         }, status=200)  # Return 200 with fallback data instead of error status
+
+# Tambahkan ke views.py
+def bad_request(request, exception=None):
+    return JsonResponse({'error': 'Bad request'}, status=400)
+
+def permission_denied(request, exception=None):
+    return JsonResponse({'error': 'Permission denied'}, status=403)
+
+def page_not_found(request, exception=None):
+    return JsonResponse({'error': 'Page not found'}, status=404)
+
+def server_error(request):
+    return JsonResponse({'error': 'Server error'}, status=500)
+
+class AssetViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint untuk mengelola aset
+    """
+    queryset = Asset.objects.all()
+    serializer_class = AssetSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def perform_create(self, serializer):
+        # Tambahkan logika khusus saat membuat aset baru
+        serializer.save(created_by=self.request.user)

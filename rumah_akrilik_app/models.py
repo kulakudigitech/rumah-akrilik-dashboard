@@ -438,14 +438,67 @@ class ProductionTracking(models.Model):
 # Inventory Management (Sama seperti sebelumnya)
 # ======================
 class Inventory(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='inventory')
-    quantity = models.DecimalField(max_digits=12, decimal_places=3, default=0) # Tambah default
-    unit = models.CharField(max_length=20, blank=True) # Buat blank=True jika bisa kosong
-    location = models.CharField(max_length=100, blank=True) # Buat blank=True
-    minimum_stock = models.DecimalField(max_digits=12, decimal_places=3, default=0)
-    last_updated = models.DateTimeField(auto_now=True)
-    class Meta: verbose_name_plural = "Inventory"; ordering = ['product'] # noqa: E701
-    def __str__(self): return f"{self.product.name} - {self.quantity} {self.unit}"
+    CATEGORY_CHOICES = [
+        ('raw_material', 'Bahan Baku - Raw Material'),
+        ('support_material', 'Bahan Baku - Support Material'),
+        ('packaging', 'Bahan Baku - Packaging'),
+        ('finished_product', 'Stock Jadi'),
+        ('equipment', 'Peralatan'),
+        ('asset', 'Aset'),
+    ]
+    
+    name = models.CharField(max_length=255)
+    sku = models.CharField(max_length=50, unique=True)
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
+    unit = models.CharField(max_length=20, default='Lembar')
+    current_stock = models.IntegerField(default=0)  # Sebelumnya 'quantity'
+    minimum_stock = models.IntegerField(default=0)
+    location = models.CharField(max_length=100, blank=True)
+    price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)  # Sebelumnya 'last_updated'
+
+    def __str__(self):
+        return f"{self.name} ({self.sku})"
+
+class InventoryTransaction(models.Model):
+    TRANSACTION_TYPES = (
+        ('in', 'Barang Masuk'),
+        ('out', 'Barang Keluar'),
+    )
+    
+    inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE, related_name='transactions')
+    item_name = models.CharField(max_length=255)  # Cached item name for history
+    type = models.CharField(max_length=3, choices=TRANSACTION_TYPES)
+    quantity = models.IntegerField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    reference = models.CharField(max_length=100, blank=True)
+    notes = models.TextField(blank=True)
+    requested_by = models.CharField(max_length=100, blank=True)
+    handled_by = models.CharField(max_length=100, blank=True)
+
+    def __str__(self):
+        return f"{self.item_name} ({self.type}) - {self.quantity}"
+
+class InventoryRequest(models.Model):
+    REQUEST_STATUS = (
+        ('pending', 'Menunggu'),
+        ('approved', 'Disetujui'),
+        ('rejected', 'Ditolak'),
+    )
+    
+    inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE, related_name='requests')
+    item_name = models.CharField(max_length=255)  # Cached item name
+    quantity = models.IntegerField()
+    status = models.CharField(max_length=10, choices=REQUEST_STATUS, default='pending')
+    requested_by = models.CharField(max_length=100)
+    order_id = models.CharField(max_length=50, blank=True)
+    request_date = models.DateTimeField(auto_now_add=True)
+    approved_date = models.DateTimeField(null=True, blank=True)
+    approved_by = models.CharField(max_length=100, blank=True)
+
+    def __str__(self):
+        return f"Request for {self.item_name} ({self.quantity}) - {self.status}"
 
 class Transaction(models.Model):
     TRANSACTION_TYPES = [('in', 'Stock In'), ('out', 'Stock Out'), ('adjust', 'Adjustment')]
@@ -573,4 +626,29 @@ class Notification(models.Model):
         if len(self.message) > 100:
             return f"{self.message[:97]}..."
         return self.message
+
+# ======================
+# Asset Management
+# ======================
+class Asset(models.Model):
+    CONDITION_CHOICES = [
+        ('good', 'Baik'),
+        ('fair', 'Sedang'),
+        ('poor', 'Rusak'),
+    ]
     
+    name = models.CharField(max_length=255)
+    category = models.CharField(max_length=100)  # Kendaraan, Properti, dll
+    acquisition_date = models.DateField()
+    acquisition_value = models.DecimalField(max_digits=15, decimal_places=2)
+    current_value = models.DecimalField(max_digits=15, decimal_places=2)
+    location = models.CharField(max_length=255)
+    condition = models.CharField(max_length=20, choices=CONDITION_CHOICES, default='good')
+    notes = models.TextField(blank=True, null=True)
+    created_by = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
+

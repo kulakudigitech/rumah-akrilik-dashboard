@@ -7,6 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from django import forms
 from .models import (
     Department,
     Role,
@@ -17,7 +18,7 @@ from .models import (
     Order,
     OrderItem,
     ProductionJob,
-    Inventory,
+    Inventory, InventoryTransaction, InventoryRequest,
     Transaction,
     Produksi,
     Absensi,
@@ -202,21 +203,41 @@ class ProductionJobAdmin(BaseAdmin):
          return "-"
 
 # Inventory Management
-@admin.register(Inventory)
-class InventoryAdmin(BaseAdmin):
-    # Asumsi Inventory punya 'unit', 'location', 'last_updated'
-    list_display = ('product_link', 'quantity', 'unit', 'location', 'last_updated')
-    list_filter = ('location',)
-    search_fields = ('product__name', 'product__code')
-    raw_id_fields = ('product',)
-    readonly_fields = ('last_updated',)
+class InventoryAdminForm(forms.ModelForm):
+    class Meta:
+        model = Inventory
+        fields = '__all__'
+        widgets = {
+            'category': forms.Select(choices=Inventory.CATEGORY_CHOICES),
+        }
 
-    @admin.display(description='Product', ordering='product__name') # Tambahkan ordering
-    def product_link(self, obj):
-        if obj.product:
-             return format_html('<a href="/admin/rumah_akrilik_app/product/{}/change/">{}</a>',
-                              obj.product.id, obj.product.name)
-        return "-"
+@admin.register(Inventory)
+class InventoryAdmin(admin.ModelAdmin):
+    form = InventoryAdminForm
+    list_display = ('name', 'sku', 'category', 'current_stock', 'minimum_stock')
+    search_fields = ('name', 'sku', 'category')
+    list_filter = ('category',)
+    
+    # Form field untuk dropdown kategori
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'sku', 'category', 'unit', 'current_stock', 'minimum_stock', 'price', 'location'),
+        }),
+    )
+
+@admin.register(InventoryTransaction)
+class InventoryTransactionAdmin(admin.ModelAdmin):
+    list_display = ['inventory', 'type', 'quantity', 'timestamp', 'handled_by']
+    list_filter = ['type', 'timestamp']
+    search_fields = ['inventory__name', 'reference', 'notes']
+    readonly_fields = ['timestamp']
+
+@admin.register(InventoryRequest)
+class InventoryRequestAdmin(admin.ModelAdmin):
+    list_display = ['inventory', 'quantity', 'requested_by', 'status', 'request_date']
+    list_filter = ['status', 'request_date']
+    search_fields = ['inventory__name', 'requested_by']
+    readonly_fields = ['request_date', 'approved_date']
 
 @admin.register(Transaction)
 class TransactionAdmin(BaseAdmin):

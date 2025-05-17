@@ -1,4 +1,5 @@
 # /root/rumah-akrilik/rumah_akrilik_app/urls.py
+from django.contrib import admin
 from .views import simple_test_view
 from django.urls import path, include
 from django.conf import settings
@@ -20,7 +21,7 @@ from .views import (
     ProduksiViewSet, ProductionJobViewSet, ProductionMaterialViewSet,
     SupplierViewSet, MarketingCampaignViewSet, InventoryViewSet, TransactionViewSet,
     RealisasiKunjunganRRViewSet, AbsensiViewSet, DashboardSummaryView,
-    HealthCheckView, PingView,
+    HealthCheckView, PingView, AssetViewSet,
     FileUploadView, UserProfileViewSet,
     MarketingOrderList, RRVisitList, MarketingPerformanceView, SalesDashboardView,
     ProductionStatusView, LowStockAlertView, ProductionScheduleView, InventoryValuationView,
@@ -35,6 +36,8 @@ from .views import (
     ProductionTrackingViewSet,
     update_production_stages,
     ProductionTrackingByOrderView,
+    InventoryTransactionViewSet, 
+    InventoryRequestViewSet,
     check_user_role_access,
     hrd_get_users,
     hrd_get_roles,
@@ -124,9 +127,10 @@ router.register('production-stages', ProductionStageViewSet)
 router.register('production-tracking', ProductionTrackingViewSet)
 
 # Inventory Management
-# router.register('inventory', InventoryViewSet, basename='inventory')  # Komentari ini
-# router.register('transactions', TransactionViewSet, basename='transaction')  # Komentari ini
-router.register('suppliers', SupplierViewSet, basename='supplier')
+router.register('inventory', InventoryViewSet, basename='inventory')
+router.register('inventory-transactions', InventoryTransactionViewSet, basename='inventory-transactions')
+router.register('inventory-requests', InventoryRequestViewSet, basename='inventory-requests')
+router.register('inventory/assets', AssetViewSet)
 
 # Marketing
 # router.register('rr-visits', RealisasiKunjunganRRViewSet, basename='rrvisit')  # Komentari ini
@@ -143,15 +147,13 @@ router.register('notifications', NotificationViewSet, basename='notification')
 # URL PATTERNS (Relative to /api/)
 # ======================
 urlpatterns = [
-    # Include URLs from the router
+    # Masukkan pola URL dari router
     path('', include(router.urls)),
 
-    # Sederhanakan endpoint auth
     path('auth/', include([
         path('login/', CustomAuthToken.as_view(), name='api-login'),
         path('token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
         path('token/verify/', TokenVerifyView.as_view(), name='token-verify'),
-        # Simpan endpoint emergency untuk berjaga-jaga
         path('emergency-login/', emergency_login_direct, name='emergency-login'),
     ])),
 
@@ -188,8 +190,10 @@ urlpatterns = [
     # =======================================================================
 
     # Inventory (relative path from /api/)
-    path('inventory/low-stock/', LowStockAlertView.as_view(), name='low-stock'),
-    path('inventory/valuation/', InventoryValuationView.as_view(), name='inventory-valuation'),
+    path('inventory/low-stock/', InventoryViewSet.as_view({'get': 'low_stock'}), name='low-stock'),
+    path('inventory/transactions/recent/', InventoryTransactionViewSet.as_view({'get': 'recent'}), name='inventory-transactions-recent'),
+    path('inventory/requests/pending/', InventoryRequestViewSet.as_view({'get': 'pending'}), name='inventory-requests-pending'),
+    path('inventory/requests/<int:pk>/approve/', InventoryRequestViewSet.as_view({'post': 'approve'}), name='inventory-request-approve'),
 
     # Dashboard (relative path from /api/)
     path('dashboard/summary/', DashboardSummaryView.as_view(), name='dashboard-summary'),
@@ -288,6 +292,9 @@ urlpatterns = [
 
     # Add simple test endpoint
     path('test-simple/', simple_test_view, name='simple-test'),
+
+    # Include router URLs
+    path('api/', include(router.urls)),
 ]
 
 # Error handlers (sudah didefinisikan di settings.py atau di root urls.py)
@@ -295,3 +302,9 @@ urlpatterns = [
 # handler403 = 'rumah_akrilik_app.views.permission_denied'
 # handler404 = 'rumah_akrilik_app.views.page_not_found'
 # handler500 = 'rumah_akrilik_app.views.server_error'
+
+print("DEBUG: Memuat urls.py")
+# Cetak semua URL patterns untuk membantu debug
+for pattern in urlpatterns:
+    print(f"URL Pattern: {pattern}")
+

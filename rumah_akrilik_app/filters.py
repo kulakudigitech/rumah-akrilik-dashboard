@@ -39,10 +39,16 @@ class ProductionFilter(django_filters.FilterSet):
         }
 
 class InventoryFilter(django_filters.FilterSet):
+    category = django_filters.CharFilter(lookup_expr='icontains')
+    name = django_filters.CharFilter(lookup_expr='icontains')
+    sku = django_filters.CharFilter(lookup_expr='icontains')
+    
+    current_stock_min = django_filters.NumberFilter(field_name='current_stock', lookup_expr='gte')
+    current_stock_max = django_filters.NumberFilter(field_name='current_stock', lookup_expr='lte')
+    
     class Meta:
         model = Inventory
-        fields = {
-            'product__name': ['icontains'],
-            'location': ['exact'],
-            'quantity': ['lt', 'gt'],
-        }
+        fields = [
+            'category', 'name', 'sku', 'location',
+            'current_stock_min', 'current_stock_max'
+        ]

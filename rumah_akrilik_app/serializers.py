@@ -6,8 +6,9 @@ from .models import (
     CustomerAddress, ProductImage, OrderStatus, ProductionMaterial, Supplier,
     MarketingCampaign, Order, Produksi, Absensi, Product, RealisasiKunjunganRR,
     Role, UserProfile, ProductCategory, OrderItem, ProductionJob, Inventory,
+    InventoryTransaction, InventoryRequest,
     Transaction, Customer, ProductionStage, ProductionTracking, Notification,
-    MarketingPlan, Department
+    MarketingPlan, Department, Asset
 )
 import logging
 from decimal import Decimal, InvalidOperation # Import Decimal dan InvalidOperation
@@ -388,9 +389,27 @@ class RealisasiKunjunganRRSerializer(serializers.ModelSerializer):
 # Inventory Management
 # ======================
 class InventorySerializer(serializers.ModelSerializer):
-    product = ProductSerializer(read_only=True)
-    product_id = serializers.PrimaryKeyRelatedField( queryset=Product.objects.filter(is_active=True), source='product', write_only=True )
-    class Meta: model = Inventory; fields = '__all__'
+    category_display = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Inventory
+        fields = ['id', 'name', 'sku', 'category', 'category_display', 'unit', 'current_stock', 
+                  'minimum_stock', 'price', 'location', 'created_at', 'updated_at']
+    
+    def get_category_display(self, obj):
+        return obj.get_category_display()
+
+class InventoryTransactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InventoryTransaction
+        fields = '__all__'
+        read_only_fields = ['timestamp']
+
+class InventoryRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InventoryRequest
+        fields = '__all__'
+        read_only_fields = ['request_date', 'approved_date']
 
 class TransactionSerializer(serializers.ModelSerializer):
     product = ProductSerializer(read_only=True)
@@ -446,3 +465,14 @@ class DepartmentSerializer(serializers.ModelSerializer):
     
     def get_user_count(self, obj):
         return obj.users.count() if hasattr(obj, 'users') else 0
+
+# ======================
+# Asset Management
+# ======================
+class AssetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Asset
+        fields = ['id', 'name', 'category', 'acquisition_date', 'acquisition_value', 
+                  'current_value', 'location', 'condition', 'notes', 
+                  'created_by', 'created_at', 'updated_at']
+        read_only_fields = ['created_by', 'created_at', 'updated_at']
