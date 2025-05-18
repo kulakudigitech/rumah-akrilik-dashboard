@@ -68,6 +68,10 @@ INSTALLED_APPS = [
     # pastikan semua app terdaftar
 ]
 
+INSTALLED_APPS += [
+    'drf_yasg',
+]
+
 MIDDLEWARE = [
     'django.middleware.cache.UpdateCacheMiddleware',  # Pastikan tidak ada duplicate
     'corsheaders.middleware.CorsMiddleware',  # harus di awal
@@ -167,8 +171,19 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # ======================
 # CORS CONFIGURATION
 # ======================
-CORS_ALLOW_ALL_ORIGINS = True  # Untuk development
+CORS_ALLOW_ALL_ORIGINS = True  # Hanya untuk development
 
+# Pastikan CORS_ALLOW_METHODS mencakup semua metode yang dibutuhkan
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+# Pastikan CORS_ALLOW_HEADERS sudah mencakup semua header yang digunakan
 CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',
@@ -179,22 +194,10 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
-] + [
-    'cache-control',
-    'pragma',
-    'access-control-allow-origin',
 ]
 
+# Pastikan CORS_ALLOW_CREDENTIALS diaktifkan jika perlu
 CORS_ALLOW_CREDENTIALS = True
-
-CORS_ALLOW_METHODS = [
-    'DELETE',
-    'GET',
-    'OPTIONS',
-    'PATCH',
-    'POST',
-    'PUT',
-]
 
 CORS_ALLOWED_ORIGINS = [
     "https://rumahakrilik.id",

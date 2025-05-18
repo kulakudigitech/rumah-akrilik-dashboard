@@ -8,7 +8,7 @@ from .models import (
     Role, UserProfile, ProductCategory, OrderItem, ProductionJob, Inventory,
     InventoryTransaction, InventoryRequest,
     Transaction, Customer, ProductionStage, ProductionTracking, Notification,
-    MarketingPlan, Department, Asset
+    MarketingPlan, Department, Asset, InventoryManualAdjustment
 )
 import logging
 from decimal import Decimal, InvalidOperation # Import Decimal dan InvalidOperation
@@ -448,6 +448,16 @@ class InventoryRequestSerializer(serializers.ModelSerializer):
         model = InventoryRequest
         fields = '__all__'
         read_only_fields = ['request_date', 'approved_date']
+
+class InventoryManualAdjustmentSerializer(serializers.ModelSerializer):
+    inventory_name = serializers.CharField(source='inventory.name', read_only=True)
+    adjusted_by_username = serializers.CharField(source='adjusted_by.username', read_only=True)
+    
+    class Meta:
+        model = InventoryManualAdjustment
+        fields = ['id', 'inventory', 'inventory_name', 'previous_stock', 'adjusted_stock', 
+                 'adjustment_quantity', 'reason', 'adjusted_by', 'adjusted_by_username', 'created_at']
+        read_only_fields = ['id', 'created_at', 'inventory_name', 'adjusted_by_username']
 
 class TransactionSerializer(serializers.ModelSerializer):
     product = ProductSerializer(read_only=True)

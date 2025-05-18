@@ -21,12 +21,12 @@ from .views import (
     ProduksiViewSet, ProductionJobViewSet, ProductionMaterialViewSet,
     SupplierViewSet, MarketingCampaignViewSet, InventoryViewSet, TransactionViewSet,
     RealisasiKunjunganRRViewSet, AbsensiViewSet, DashboardSummaryView,
-    HealthCheckView, PingView, AssetViewSet,
-    FileUploadView, UserProfileViewSet,
+    HealthCheckView, PingView, AssetViewSet, sync_inventory, debug_sync_inventory,
+    FileUploadView, UserProfileViewSet, update_inventory_manual, api_inventory_status,
     MarketingOrderList, RRVisitList, MarketingPerformanceView, SalesDashboardView,
     ProductionStatusView, LowStockAlertView, ProductionScheduleView, InventoryValuationView,
-    FileDownloadView, SystemConfigView,
-    CustomAuthToken,
+    FileDownloadView, SystemConfigView, inventory_manual_adjustments,
+    CustomAuthToken, debug_manual_adjustments,
     UserMeView, UserRegistrationView,
     test_api, verify_auth,
     DashboardStatsView,
@@ -40,8 +40,10 @@ from .views import (
     ProductionTrackingByOrderView,
     InventoryTransactionViewSet, 
     InventoryRequestViewSet,
+    receive_inventory_request,
     low_stock_view,
     inventory_low_stock,
+    api_endpoints_list,
     check_user_role_access,
     hrd_get_users,
     hrd_get_roles,
@@ -200,8 +202,16 @@ urlpatterns = [
     path('inventory/transactions/recent/', InventoryTransactionViewSet.as_view({'get': 'recent'}), name='inventory-transactions-recent'),
     path('inventory/requests/pending/', InventoryRequestViewSet.as_view({'get': 'pending'}), name='inventory-requests-pending'),
     path('inventory/requests/<int:pk>/approve/', InventoryRequestViewSet.as_view({'post': 'approve'}), name='inventory-request-approve'),
+    path('inventory-requests/pending/', InventoryRequestViewSet.as_view({'get': 'pending'}), name='inventory-requests-pending-alt'),
+    path('inventory-requests/<int:pk>/approve/', InventoryRequestViewSet.as_view({'post': 'approve'}), name='inventory-request-approve-alt'),
     path('inventory/critical-stock/', low_stock_view, name='low-stock-explicit'),
     path('inventory/low-stock/', inventory_low_stock, name='inventory-low-stock'),
+    path('inventory-requests/<int:request_id>/receive/', receive_inventory_request, name='receive-inventory'),
+    path('inventory-sync/', sync_inventory, name='sync-inventory-alt'),
+    path('inventory/sync/', sync_inventory, name='sync-inventory'),
+    path('api/inventory/sync/', sync_inventory, name='api-sync-inventory'),
+    path('api/inventory/<int:pk>/manual-update/', update_inventory_manual, name='update-inventory-manual'),
+    path('api/inventory-manual-adjustments/', inventory_manual_adjustments, name='inventory-manual-adjustments'),
 
     # Dashboard (relative path from /api/)
     path('dashboard/summary/', DashboardSummaryView.as_view(), name='dashboard-summary'),
@@ -235,6 +245,7 @@ urlpatterns = [
 
     # Add this line for debug order create
     path('debug/order/', OrderViewSet.as_view({'post': 'create'}), name='debug-order-create'),
+    path('debug/endpoints/', api_endpoints_list, name='api-endpoints-list'),
 
     # Add health check endpoint
     path('health/', simple_test_view, name='api-health'),
@@ -244,6 +255,9 @@ urlpatterns = [
     path('debug/order-status/', test_order_status, name='test-order-status'),
     path('debug/production-tracking/', test_production_tracking, name='test-production-tracking'),
     path('debug/environment/', test_environment, name='test-environment'),
+    path('debug/inventory-sync/', debug_sync_inventory, name='debug-inventory-sync'),
+    path('api/debug/inventory-status/', api_inventory_status, name='api-inventory-status'),
+    path('api/debug/manual-adjustments/', debug_manual_adjustments, name='debug-manual-adjustments'),
 
     # User role endpoints
     path('user/check-role/<str:role_name>/', check_user_role_access, name='check-user-role'),

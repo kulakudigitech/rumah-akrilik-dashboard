@@ -42,6 +42,8 @@ import uuid
 import os
 import random
 import calendar
+from django.shortcuts import get_object_or_404
+import traceback
 
 # --- Import Models ---
 from .models import (
@@ -50,7 +52,7 @@ from .models import (
     InventoryTransaction, InventoryRequest,
     Transaction, Customer, ProductionStage, ProductionTracking, CustomUser,
     Notification, Product, MarketingCampaign, Produksi, Absensi, RealisasiKunjunganRR,
-    MarketingPlan, Department, UserProfile, Asset # Tambahkan ini
+    MarketingPlan, Department, UserProfile, Asset, InventoryManualAdjustment # Tambahkan ini
 )
 
 # Add to top of views.py file
@@ -1331,6 +1333,458 @@ def low_stock_view(request):
     except Exception as e:
         return Response({"detail": str(e)}, status=500)
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def receive_inventory_request(request, request_id):
+    """
+    Endpoint untuk menerima request inventory dan menambah stock
+    """
+    try:
+        inv_request = InventoryRequest.objects.get(id=request_id)
+        inventory = inv_request.inventory
+        
+        # Update status request
+        if inv_request.status == 'received':
+            return Response({"success": False, "message": "Request ini sudah diproses sebelumnya"}, status=400)
+            
+        prev_status = inv_request.status
+        inv_request.status = 'received'
+        
+        # Handle actual quantity jika ada
+        actual_quantity = request.data.get('actual_quantity')
+        quantity_to_add = inv_request.quantity  # Default use requested quantity
+        
+        if actual_quantity is not None:
+            try:
+                actual_qty = int(actual_quantity)
+                if actual_qty >= 0:
+                    quantity_to_add = actual_qty
+                    inv_request.quantity = actual_qty  # Update dengan jumlah aktual
+                else:
+                    return Response({"success": False, "message": "Kuantitas tidak boleh negatif"}, status=400)
+            except (ValueError, TypeError):
+                return Response({"success": False, "message": "Kuantitas harus berupa angka"}, status=400)
+        
+        # PENTING: Tambahkan stock ke inventory
+        inventory.current_stock += quantity_to_add
+        inventory.save()
+        
+        # Save inventory request
+        inv_request.save()
+        
+        # Create transaction log
+        InventoryTransaction.objects.create(
+            inventory=inventory,
+            item_name=inventory.name,
+            type='in',
+            quantity=quantity_to_add,
+            reference=f"Req#{inv_request.id}",
+            notes=f"Penerimaan inventory request {inv_request.id}",
+            requested_by=inv_request.requested_by,
+            handled_by=request.user.username
+        )
+        
+        return Response({
+            "success": True,
+            "message": "Inventory berhasil diterima dan stok ditambahkan",
+            "data": {
+                "request_id": inv_request.id,
+                "item_name": inv_request.item_name,
+                "quantity": quantity_to_add,
+                "previous_stock": inventory.current_stock - quantity_to_add,
+                "new_stock": inventory.current_stock
+            }
+        })
+        
+    except InventoryRequest.DoesNotExist:
+        return Response({"success": False, "message": f"Request dengan ID {request_id} tidak ditemukan"}, status=404)
+        
+    except Exception as e:
+        return Response({"success": False, "message": f"Error: {str(e)}"}, status=500)
+
+@api_view(['POST', 'GET'])
+@permission_classes([IsAuthenticated])
+def sync_inventory(request):
+    """
+    Endpoint untuk update ulang data inventory berdasarkan transaksi
+    dengan mempertahankan update manual yang dilakukan
+    """
+    try:
+        # Get all inventory items
+        inventories = Inventory.objects.all()
+        updated_count = 0
+        log_data = []
+        
+        for inventory in inventories:
+            try:
+                # Cek apakah ada inventaris dengan manual_adjustment
+                manual_adjustment = InventoryManualAdjustment.objects.filter(
+                    inventory=inventory
+                ).order_by('-created_at').first()
+                
+                # Ambil tanggal adjustment terakhir atau tanggal awal jika tidak ada
+                last_adjustment_date = manual_adjustment.created_at if manual_adjustment else datetime(2000, 1, 1, tzinfo=timezone.utc)
+                
+                # Hitung total stok masuk setelah adjustment terakhir
+                in_transactions = InventoryTransaction.objects.filter(
+                    inventory=inventory, 
+                    type='in',
+                    timestamp__gt=last_adjustment_date
+                ).aggregate(total=Sum('quantity'))['total'] or 0
+                
+                # Hitung total stok keluar setelah adjustment terakhir
+                out_transactions = InventoryTransaction.objects.filter(
+                    inventory=inventory, 
+                    type='out',
+                    timestamp__gt=last_adjustment_date
+                ).aggregate(total=Sum('quantity'))['total'] or 0
+                
+                # Jika ada manual adjustment, gunakan nilai basis dari adjustment terakhir
+                # Jika tidak, hitung dari semua transaksi
+                if manual_adjustment:
+                    # Base stock dari manual adjustment + transaksi masuk - transaksi keluar setelah adjustment
+                    calculated_stock = manual_adjustment.adjusted_stock + in_transactions - out_transactions
+                else:
+                    # Hitung semua transaksi jika tidak ada adjustment
+                    total_in = InventoryTransaction.objects.filter(
+                        inventory=inventory, 
+                        type='in'
+                    ).aggregate(total=Sum('quantity'))['total'] or 0
+                    
+                    total_out = InventoryTransaction.objects.filter(
+                        inventory=inventory, 
+                        type='out'
+                    ).aggregate(total=Sum('quantity'))['total'] or 0
+                    
+                    calculated_stock = total_in - total_out
+                
+                # Log informasi untuk debugging
+                log_entry = {
+                    "inventory_id": inventory.id,
+                    "name": inventory.name,
+                    "current_stock": inventory.current_stock,
+                    "calculated_stock": calculated_stock,
+                    "manual_adjustment": True if manual_adjustment else False,
+                    "manual_adjustment_date": manual_adjustment.created_at if manual_adjustment else None,
+                    "manual_adjustment_value": manual_adjustment.adjusted_stock if manual_adjustment else None,
+                    "in_total": in_transactions,
+                    "out_total": out_transactions,
+                    "updated": inventory.current_stock != calculated_stock
+                }
+                log_data.append(log_entry)
+                
+                # Update jika berbeda dengan stok saat ini
+                if inventory.current_stock != calculated_stock:
+                    inventory.current_stock = calculated_stock
+                    inventory.save()
+                    updated_count += 1
+            except Exception as item_error:
+                log_data.append({
+                    "inventory_id": inventory.id if hasattr(inventory, 'id') else None,
+                    "name": inventory.name if hasattr(inventory, 'name') else "Unknown",
+                    "error": str(item_error)
+                })
+        
+        return Response({
+            "success": True,
+            "message": f"Sinkronisasi selesai. {updated_count} item diperbarui.",
+            "updated_count": updated_count,
+            "log_data": log_data
+        })
+    except Exception as e:
+        import traceback
+        stack_trace = traceback.format_exc()
+        
+        return Response({
+            "success": False,
+            "message": f"Error during synchronization: {str(e)}",
+            "error_details": stack_trace
+        }, status=500)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def update_inventory_manual(request, pk):
+    """
+    Endpoint untuk update manual stock inventory dan mencatat
+    perubahan sebagai manual adjustment
+    """
+    try:
+        inventory = get_object_or_404(Inventory, pk=pk)
+        data = request.data
+        
+        # Log data untuk debugging
+        print(f"Manual update request for inventory {pk}: {data}")
+        
+        # Pastikan data current_stock tersedia
+        if 'current_stock' not in data:
+            return Response({
+                "success": False,
+                "message": "current_stock field is required"
+            }, status=400)
+            
+        previous_stock = inventory.current_stock
+        new_stock = int(data['current_stock'])
+        adjustment_quantity = new_stock - previous_stock
+        reason = data.get('reason', 'Manual stock update')
+        
+        # Catat perubahan dalam model InventoryManualAdjustment
+        manual_adjustment = InventoryManualAdjustment.objects.create(
+            inventory=inventory,
+            previous_stock=previous_stock,
+            adjusted_stock=new_stock,
+            adjustment_quantity=adjustment_quantity,
+            reason=reason,
+            adjusted_by=request.user
+        )
+        
+        print(f"Created manual adjustment record: {manual_adjustment.id}")
+        
+        # Update inventory stock
+        inventory.current_stock = new_stock
+        inventory.save()
+        
+        # Buat transaksi untuk tracking
+        transaction_type = 'in' if adjustment_quantity > 0 else 'out'
+        transaction = InventoryTransaction.objects.create(
+            inventory=inventory,
+            item_name=inventory.name,
+            type=transaction_type,
+            quantity=abs(adjustment_quantity),
+            reference='Manual adjustment',
+            notes=reason,
+            handled_by=request.user.username if request.user else 'unknown'
+        )
+        
+        print(f"Created transaction record: {transaction.id}")
+        
+        return Response({
+            "success": True,
+            "message": f"Stock diperbarui dari {previous_stock} menjadi {new_stock}",
+            "previous_stock": previous_stock,
+            "current_stock": new_stock,
+            "adjustment": adjustment_quantity,
+            "adjustment_id": manual_adjustment.id,
+            "transaction_id": transaction.id
+        })
+    except Inventory.DoesNotExist:
+        return Response({
+            "success": False,
+            "message": f"Inventory with id {pk} not found"
+        }, status=404)
+    except Exception as e:
+        print(f"Error in update_inventory_manual: {e}")
+        print(traceback.format_exc())
+        
+        return Response({
+            "success": False,
+            "message": f"Error updating inventory: {str(e)}",
+            "error_details": traceback.format_exc()
+        }, status=500)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def inventory_manual_adjustments(request):
+    """
+    Endpoint untuk mendapatkan daftar penyesuaian manual inventaris
+    dengan filter dan pagination
+    """
+    try:
+        # Get query parameters
+        start_date_str = request.query_params.get('start_date')
+        end_date_str = request.query_params.get('end_date')
+        
+        # Build queryset with related inventory data
+        queryset = InventoryManualAdjustment.objects.select_related(
+            'inventory', 'adjusted_by'
+        ).order_by('-created_at')
+        
+        # Apply date filters if provided
+        if start_date_str:
+            try:
+                start_date = parse_date(start_date_str)
+                if start_date:
+                    queryset = queryset.filter(created_at__date__gte=start_date)
+            except Exception as e:
+                print(f"Date parsing error for start_date: {e}")
+                
+        if end_date_str:
+            try:
+                end_date = parse_date(end_date_str)
+                if end_date:
+                    queryset = queryset.filter(created_at__date__lte=end_date)
+            except Exception as e:
+                print(f"Date parsing error for end_date: {e}")
+        
+        # Create response with enhanced data
+        result = []
+        for adjustment in queryset:
+            result.append({
+                'id': adjustment.id,
+                'inventory_id': adjustment.inventory.id,
+                'inventory_name': adjustment.inventory.name,
+                'inventory_sku': adjustment.inventory.sku,
+                'previous_stock': adjustment.previous_stock,
+                'adjusted_stock': adjustment.adjusted_stock,
+                'adjustment_quantity': adjustment.adjustment_quantity,
+                'reason': adjustment.reason,
+                'adjusted_by_username': adjustment.adjusted_by.username if adjustment.adjusted_by else 'Unknown',
+                'created_at': adjustment.created_at.isoformat()
+            })
+        
+        # Log response for debugging
+        print(f"Returning {len(result)} manual adjustment records")
+        
+        return Response(result)
+    except Exception as e:
+        import traceback
+        print(f"Error in inventory_manual_adjustments: {e}")
+        print(traceback.format_exc())
+        return Response({
+            'error': str(e),
+            'traceback': traceback.format_exc()
+        }, status=500)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])  # Izinkan akses tanpa autentikasi untuk debugging
+def debug_manual_adjustments(request):
+    """
+    Endpoint debugging untuk memeriksa data manual adjustment
+    """
+    try:
+        # Cek apakah model terdaftar
+        from django.apps import apps
+        models = apps.get_app_config('rumah_akrilik_app').get_models()
+        model_names = [model.__name__ for model in models]
+        
+        # Cek apakah ada data manual adjustment
+        adjustment_count = 0
+        manual_adjustment_exists = False
+        
+        for model in models:
+            if model.__name__ == 'InventoryManualAdjustment':
+                manual_adjustment_exists = True
+                adjustment_count = model.objects.count()
+                break
+        
+        # Lihat URL patterns yang terdaftar
+        from django.urls import get_resolver
+        resolver = get_resolver(None)
+        url_patterns = []
+        
+        for pattern in resolver.url_patterns:
+            if hasattr(pattern, 'pattern'):
+                try:
+                    url_patterns.append(str(pattern.pattern))
+                except:
+                    url_patterns.append("Unable to get pattern string")
+        
+        # Periksa definisi model
+        model_fields = {}
+        if manual_adjustment_exists:
+            from .models import InventoryManualAdjustment
+            model_fields = {f.name: str(f.__class__.__name__) for f in InventoryManualAdjustment._meta.get_fields()}
+        
+        return Response({
+            'status': 'OK',
+            'model_exists': 'InventoryManualAdjustment' in model_names,
+            'adjustment_count': adjustment_count,
+            'registered_models': model_names,
+            'url_patterns_sample': url_patterns[:20],  # Batasi jumlah untuk menghindari respons terlalu panjang
+            'model_fields': model_fields
+        })
+    except Exception as e:
+        return Response({
+            'status': 'ERROR',
+            'error': str(e),
+            'traceback': traceback.format_exc()
+        }, status=500)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def api_inventory_status(request):
+    """Check status of inventory endpoints"""
+    try:
+        # Get available endpoints
+        inventory_endpoints = [
+            {'path': '/api/inventory/', 'method': 'GET', 'description': 'List semua inventory'},
+            {'path': '/api/inventory/:id/', 'method': 'GET', 'description': 'Detail inventory'},
+            {'path': '/api/inventory/:id/', 'method': 'PUT', 'description': 'Update inventory'},
+            {'path': '/api/inventory/:id/manual-update/', 'method': 'POST', 'description': 'Update manual stok'},
+        ]
+        
+        # List available models in app
+        from django.apps import apps
+        app_models = apps.get_app_config('rumah_akrilik_app').get_models()
+        models = [{'name': model.__name__, 'fields': [f.name for f in model._meta.get_fields()]} for model in app_models]
+        
+        return Response({
+            'status': 'OK',
+            'inventory_endpoints': inventory_endpoints,
+            'available_models': models
+        })
+    except Exception as e:
+        return Response({
+            'status': 'ERROR',
+            'message': str(e),
+            'traceback': traceback.format_exc()
+        }, status=500)
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def debug_sync_inventory(request):
+    """
+    Endpoint debug untuk sinkronisasi inventory
+    """
+    try:
+        success = True
+        message = "Debug sync started..."
+        
+        # Info untuk debug
+        inventory_count = Inventory.objects.count()
+        transaction_count = InventoryTransaction.objects.count()
+        
+        # Jika POST, lakukan sinkronisasi sederhana
+        if request.method == 'POST':
+            updated = 0
+            
+            # Lakukan sinkronisasi untuk semua item inventory
+            for inventory in Inventory.objects.all():
+                # Hitung in transactions
+                in_trans = InventoryTransaction.objects.filter(
+                    inventory=inventory, type='in'
+                ).aggregate(total=Sum('quantity'))['total'] or 0
+                
+                # Hitung out transactions
+                out_trans = InventoryTransaction.objects.filter(
+                    inventory=inventory, type='out'
+                ).aggregate(total=Sum('quantity'))['total'] or 0
+                
+                # Hitung stok berdasarkan transaksi
+                calculated_stock = in_trans - out_trans
+                
+                # Update jika berbeda
+                if inventory.current_stock != calculated_stock:
+                    inventory.current_stock = calculated_stock
+                    inventory.save()
+                    updated += 1
+            
+            message = f"Debug sync completed. Updated {updated} items."
+        
+        return Response({
+            "success": success,
+            "message": message,
+            "debug_info": {
+                "inventory_count": inventory_count,
+                "transaction_count": transaction_count,
+                "method": request.method
+            }
+        })
+    except Exception as e:
+        return Response({
+            "success": False,
+            "message": f"Debug sync error: {str(e)}"
+        }, status=500)
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def finished_products(request):
@@ -1403,21 +1857,52 @@ class InventoryRequestViewSet(viewsets.ModelViewSet):
     # POST /api/inventory/requests/{id}/approve/
     @action(detail=True, methods=['post'])
     def approve(self, request, pk=None):
-        """Approve a pending inventory request"""
-        inventory_request = self.get_object()
-        
-        if inventory_request.status != 'pending':
+        """Approve an inventory request and update inventory stock"""
+        try:
+            inv_request = self.get_object()
+            
+            # Cek status request
+            if inv_request.status != 'approved':
+                # Update status menjadi received (diterima gudang)
+                inv_request.status = 'received'
+                
+                # Jika ada actual_quantity yang dikirim dari frontend
+                actual_quantity = request.data.get('actual_quantity')
+                if actual_quantity is not None:
+                    try:
+                        actual_qty = int(actual_quantity)
+                        if actual_qty >= 0:
+                            inv_request.quantity = actual_qty  # Update dengan jumlah aktual
+                    except (ValueError, TypeError):
+                        return Response(
+                            {"detail": "Nilai actual_quantity harus berupa angka positif"}, 
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                
+                inv_request.save()
+                
+                # Buat log transaksi penerimaan
+                InventoryTransaction.objects.create(
+                    inventory=inv_request.inventory,
+                    item_name=inv_request.inventory.name,
+                    type='in',
+                    quantity=inv_request.quantity,
+                    reference=f"Req#{inv_request.id}",
+                    notes=f"Penerimaan request {inv_request.id}",
+                    requested_by=inv_request.requested_by,
+                    handled_by=request.user.username
+                )
+                
+                return Response({"detail": "Request berhasil diterima"})
+            else:
+                return Response(
+                    {"detail": "Request sudah diproses sebelumnya"}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        except Exception as e:
             return Response(
-                {'error': 'Hanya permintaan dengan status menunggu yang dapat disetujui'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        # Update inventory
-        inventory = inventory_request.inventory
-        if inventory.current_stock < inventory_request.quantity:
-            return Response(
-                {'error': 'Stok tidak mencukupi untuk menyetujui permintaan ini'}, 
-                status=status.HTTP_400_BAD_REQUEST
+                {"detail": f"Gagal memproses request: {str(e)}"}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
         
         # Update request status
@@ -3299,6 +3784,21 @@ def page_not_found(request, exception=None):
 def server_error(request):
     return JsonResponse({'error': 'Server error'}, status=500)
 
+# Tambahkan function ini di views.py
+def standardize_response(data=None, success=True, message=None, status_code=200):
+    """
+    Standardisasi format respons API
+    """
+    response = {
+        'success': success,
+        'message': message
+    }
+    
+    if data is not None:
+        response['data'] = data
+        
+    return Response(response, status=status_code)
+
 class AssetViewSet(viewsets.ModelViewSet):
     """
     API endpoint untuk mengelola aset
@@ -3410,3 +3910,48 @@ def inventory_low_stock(request):
             {"detail": "Terjadi kesalahan saat mengambil data stok rendah"},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def check_auth(request):
+    """Endpoint untuk memeriksa status autentikasi"""
+    return Response({
+        "authenticated": True,
+        "username": request.user.username,
+        "user_id": request.user.id,
+        "timestamp": timezone.now()
+    })
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def api_endpoints_list(request):
+    """
+    Menampilkan semua endpoint API yang tersedia
+    Berguna untuk debugging frontend
+    """
+    from django.urls import get_resolver
+    from rest_framework.reverse import reverse
+    
+    resolver = get_resolver()
+    url_patterns = []
+    
+    for pattern in resolver.url_patterns:
+        if hasattr(pattern, 'url_patterns'):
+            for sub_pattern in pattern.url_patterns:
+                if hasattr(sub_pattern, 'name') and sub_pattern.name:
+                    try:
+                        url = reverse(sub_pattern.name, request=request)
+                        url_patterns.append({
+                            'name': sub_pattern.name,
+                            'url': url,
+                            'methods': getattr(sub_pattern.callback, 'actions', {}) 
+                                       or ['GET', 'POST', 'PUT', 'DELETE']
+                        })
+                    except:
+                        pass
+    
+    return Response({
+        'status': 'success',
+        'endpoints': url_patterns
+    })
+

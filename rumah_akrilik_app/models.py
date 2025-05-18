@@ -505,6 +505,22 @@ class InventoryRequest(models.Model):
 
     def __str__(self):
         return f"Request for {self.item_name} ({self.quantity}) - {self.status}"
+    
+class InventoryManualAdjustment(models.Model):
+    """Model untuk menyimpan riwayat penyesuaian manual pada inventory"""
+    inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE, related_name='manual_adjustments')
+    previous_stock = models.IntegerField(default=0)
+    adjusted_stock = models.IntegerField(default=0)
+    adjustment_quantity = models.IntegerField(default=0)  # Bisa positif atau negatif
+    reason = models.CharField(max_length=500, blank=True, null=True)
+    adjusted_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        
+    def __str__(self):
+        return f"Adjustment for {self.inventory.name}: {self.adjustment_quantity} ({self.reason or 'No reason provided'})"
 
 class Transaction(models.Model):
     TRANSACTION_TYPES = [('in', 'Stock In'), ('out', 'Stock Out'), ('adjust', 'Adjustment')]
