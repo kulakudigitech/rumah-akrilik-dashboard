@@ -69,6 +69,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'django.middleware.cache.UpdateCacheMiddleware',  # Pastikan tidak ada duplicate
     'corsheaders.middleware.CorsMiddleware',  # harus di awal
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -77,6 +78,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.cache.FetchFromCacheMiddleware',  # Pastikan tidak ada duplicate
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -343,3 +345,12 @@ SWAGGER_SETTINGS = {
 # ======================
 APP_VERSION = '1.0.0'
 API_PREFIX = 'api/'
+
+# ======================
+# CACHE CONFIGURATION
+# ======================
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',  # Menonaktifkan cache
+    }
+}

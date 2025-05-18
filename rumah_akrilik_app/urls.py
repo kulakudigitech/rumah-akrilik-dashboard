@@ -34,10 +34,14 @@ from .views import (
     OrderMonthlyReportView,
     ProductionStageViewSet,
     ProductionTrackingViewSet,
+    production_material_categories,
     update_production_stages,
+    finished_products,
     ProductionTrackingByOrderView,
     InventoryTransactionViewSet, 
     InventoryRequestViewSet,
+    low_stock_view,
+    inventory_low_stock,
     check_user_role_access,
     hrd_get_users,
     hrd_get_roles,
@@ -182,7 +186,8 @@ urlpatterns = [
     # Perhatikan: router.register('production-stages', ProductionStageViewSet) sudah ada di atas.
     # Path ini akan spesifik untuk 'get: list' dan mungkin berguna jika ingin nama URL yang berbeda dari router.
     path('production-stages/list/', ProductionStageViewSet.as_view({'get': 'list'}), name='production-stages-list'), # Mengubah path sedikit agar tidak sama persis dengan root dari router
-
+    path('production-materials/categories/', production_material_categories, name='production-material-categories'),
+    
     # Path untuk OrderViewSet dengan prefix 'orders/' (berbeda dari 'order/' yang diregister router)
     path('orders/', OrderViewSet.as_view({'get': 'list', 'post': 'create'}), name='api-order-list'),
     path('orders/<int:pk>/', OrderViewSet.as_view({'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}), name='api-order-detail'),
@@ -194,6 +199,8 @@ urlpatterns = [
     path('inventory/transactions/recent/', InventoryTransactionViewSet.as_view({'get': 'recent'}), name='inventory-transactions-recent'),
     path('inventory/requests/pending/', InventoryRequestViewSet.as_view({'get': 'pending'}), name='inventory-requests-pending'),
     path('inventory/requests/<int:pk>/approve/', InventoryRequestViewSet.as_view({'post': 'approve'}), name='inventory-request-approve'),
+    path('inventory/critical-stock/', low_stock_view, name='low-stock-explicit'),
+    path('inventory/low-stock/', inventory_low_stock, name='inventory-low-stock'),
 
     # Dashboard (relative path from /api/)
     path('dashboard/summary/', DashboardSummaryView.as_view(), name='dashboard-summary'),
@@ -262,6 +269,7 @@ urlpatterns = [
     # Tambahkan path alternatif untuk my-tasks (setelah path yang sudah ada)
     path('production-trackings/my-tasks/', get_my_trackings, name='my_trackings'),  
     path('production-tracking/my-tasks/', get_my_trackings, name='my_trackings_alt'),  # Alternatif URL
+    path('finished-products/', finished_products, name='finished-products'),
 
     # Include API URLs
     # path('api/', include('rumah_akrilik_app.api.urls')),

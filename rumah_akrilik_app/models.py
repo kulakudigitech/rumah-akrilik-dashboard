@@ -451,10 +451,15 @@ class Inventory(models.Model):
     sku = models.CharField(max_length=50, unique=True)
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
     unit = models.CharField(max_length=20, default='Lembar')
-    current_stock = models.IntegerField(default=0)  # Sebelumnya 'quantity'
+    current_stock = models.IntegerField(default=1)  # Sebelumnya 'quantity'
     minimum_stock = models.IntegerField(default=0)
     location = models.CharField(max_length=100, blank=True)
     price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    acquisition_date = models.DateField(null=True, blank=True)
+    acquisition_value = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    current_value = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    condition = models.CharField(max_length=20, default='baik')
+    notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)  # Sebelumnya 'last_updated'
 

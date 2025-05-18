@@ -389,15 +389,39 @@ class RealisasiKunjunganRRSerializer(serializers.ModelSerializer):
 # Inventory Management
 # ======================
 class InventorySerializer(serializers.ModelSerializer):
-    category_display = serializers.SerializerMethodField()
+    # Tambahkan field asset_type untuk mendukung frontend
+    asset_type = serializers.CharField(required=False, allow_blank=True)
     
     class Meta:
         model = Inventory
-        fields = ['id', 'name', 'sku', 'category', 'category_display', 'unit', 'current_stock', 
-                  'minimum_stock', 'price', 'location', 'created_at', 'updated_at']
+        fields = [
+            'id', 'name', 'sku', 'category', 'asset_type', 
+            'unit', 'current_stock', 'minimum_stock', 'price',
+            'location', 'acquisition_date', 'acquisition_value', 
+            'current_value', 'condition', 'notes'
+        ]
     
-    def get_category_display(self, obj):
-        return obj.get_category_display()
+    def validate(self, data):
+        # Normalisasi kategori
+        if 'category' in data and data['category'] == 'asset':
+            if 'asset_type' not in data or not data['asset_type']:
+                if 'name' in data and any(keyword in data['name'].lower() for 
+                                          keyword in ['mobil', 'kendaraan', 'gedung', 'tanah']):
+                    data['asset_type'] = 'Kendaraan' if any(k in data['name'].lower() 
+                                                           for k in ['mobil', 'kendaraan']) else 'Bangunan'
+                else:
+                    data['asset_type'] = 'Lainnya'
+                    
+        # Pastikan acquisition_value dan current_value selalu ada dengan nilai default
+        if 'price' in data:
+            if 'current_value' not in data or data['current_value'] is None:
+                data['current_value'] = data['price']
+                
+        # Jika both missing, set to zero
+        if ('acquisition_value' not in data or data['acquisition_value'] is None):
+            data['acquisition_value'] = data.get('price', 0)
+            
+        return data
 
 class InventoryTransactionSerializer(serializers.ModelSerializer):
     class Meta:

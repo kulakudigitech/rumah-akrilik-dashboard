@@ -1177,6 +1177,22 @@ class ProductionMaterialViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user) 
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def production_material_categories(request):
+    """Get unique categories for production materials"""
+    try:
+        # Get distinct categories from ProductionMaterial model
+        categories = ProductionMaterial.objects.values('type').distinct()
+        # Transform to desired response format
+        result = [{"id": item["type"], "name": item["type"]} for item in categories]
+        return Response(result)
+    except Exception as e:
+        return Response(
+            {"detail": f"Error retrieving material categories: {str(e)}"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
    # Tambahkan setelah ProductionMaterialViewSet atau di bagian supplier management
 class SupplierViewSet(viewsets.ModelViewSet):
     queryset = Supplier.objects.all().order_by('name')
@@ -1244,6 +1260,89 @@ class InventoryViewSet(viewsets.ModelViewSet):
         low_stock_items = Inventory.objects.filter(current_stock__lte=F('minimum_stock'))
         serializer = self.get_serializer(low_stock_items, many=True)
         return Response(serializer.data)  # Selalu mengembalikan array
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def low_stock_view(request):
+    """Dedicated view for low stock items"""
+    low_stock_items = Inventory.objects.filter(current_stock__lte=F('minimum_stock'))
+    serializer = InventorySerializer(low_stock_items, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def inventory_low_stock(request):
+    threshold_type = request.query_params.get('type', 'low')
+    
+    if threshold_type == 'critical':
+        # Logic untuk critical stock (sangat rendah)
+        items = Inventory.objects.filter(current_stock__lte=F('minimum_stock') * 0.5)
+    else:
+        # Logic untuk low stock (rendah)
+        items = Inventory.objects.filter(current_stock__lte=F('minimum_stock'))
+        
+    serializer = InventorySerializer(items, many=True)
+    return Response(serializer.data)
+
+# views.py pada backend
+@api_view(['GET', 'POST', 'PUT'])
+def inventory_detail(request, pk=None):
+    """
+    Handle inventory detail requests with special processing for assets
+    """
+    try:
+        if request.method == 'GET':
+            inventory = get_object_or_404(Inventory, pk=pk)
+            serializer = InventorySerializer(inventory)
+            return Response(serializer.data)
+            
+        elif request.method in ['POST', 'PUT']:
+            # Extract data
+            data = request.data
+            
+            # Handle PUT method (update)
+            if request.method == 'PUT':
+                inventory = get_object_or_404(Inventory, pk=pk)
+                serializer = InventorySerializer(inventory, data=data)
+                
+                # Log received data for debugging
+                print(f"Received PUT data: {data}")
+            else:
+                # Handle POST method (create)
+                serializer = InventorySerializer(data=data)
+                
+            if serializer.is_valid():
+                instance = serializer.save()
+                
+                # Ensure special fields are properly saved
+                if 'acquisition_value' in data:
+                    instance.acquisition_value = data['acquisition_value']
+                if 'current_value' in data:
+                    instance.current_value = data['current_value']
+                if 'acquisition_date' in data:
+                    instance.acquisition_date = data['acquisition_date']
+                
+                instance.save()
+                return Response(serializer.data)
+            
+            return Response(serializer.errors, status=400)
+            
+    except Exception as e:
+        return Response({"detail": str(e)}, status=500)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def finished_products(request):
+    """Retrieve finished products inventory"""
+    try:
+        finished_items = Inventory.objects.filter(category='finished_product')
+        serializer = InventorySerializer(finished_items, many=True)
+        return Response(serializer.data)
+    except Exception as e:
+        return Response(
+            {"detail": f"Error retrieving finished products: {str(e)}"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 class InventoryTransactionViewSet(viewsets.ModelViewSet):
     queryset = InventoryTransaction.objects.all().order_by('-timestamp')
