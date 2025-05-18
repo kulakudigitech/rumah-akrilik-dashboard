@@ -79,7 +79,8 @@ from .views import (
     reject_order,
     NotificationViewSet, # Pastikan NotificationViewSet sudah diimpor
     get_user_notifications, # Pastikan get_user_notifications sudah diimpor
-    mark_notification_read # Pastikan mark_notification_read sudah diimpor
+    mark_notification_read, # Pastikan mark_notification_read sudah diimpor
+    debug_asset_create
 )
 
 from rest_framework.decorators import api_view, permission_classes
@@ -303,6 +304,10 @@ urlpatterns = [
 
     # Include router URLs
     path('api/', include(router.urls)),
+
+    # Debug Asset
+    path('debug/asset-create/', debug_asset_create, name='debug-asset-create'),
+
 ]
 
 # Error handlers (sudah didefinisikan di settings.py atau di root urls.py)

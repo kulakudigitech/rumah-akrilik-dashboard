@@ -498,6 +498,7 @@ class InventoryRequest(models.Model):
     status = models.CharField(max_length=10, choices=REQUEST_STATUS, default='pending')
     requested_by = models.CharField(max_length=100)
     order_id = models.CharField(max_length=50, blank=True)
+    notes = models.TextField(blank=True, null=True)
     request_date = models.DateTimeField(auto_now_add=True)
     approved_date = models.DateTimeField(null=True, blank=True)
     approved_by = models.CharField(max_length=100, blank=True)

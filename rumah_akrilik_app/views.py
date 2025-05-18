@@ -1261,32 +1261,33 @@ class InventoryViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(low_stock_items, many=True)
         return Response(serializer.data)  # Selalu mengembalikan array
 
+    # Di dalam class InventoryViewSet
+    def create(self, request, *args, **kwargs):
+        # Add debugging log
+        print(f"Creating new inventory item with data: {request.data}")
+        
+        # Pastikan kategori asset diproses dengan benar
+        if request.data.get('category') == 'asset':
+            # Khusus untuk aset, pastikan field wajib terisi
+            if not request.data.get('acquisition_date'):
+                return Response(
+                    {"detail": "acquisition_date wajib diisi untuk aset"}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+                
+            if not request.data.get('acquisition_value'):
+                return Response(
+                    {"detail": "acquisition_value wajib diisi untuk aset"}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+                
+        # Lanjutkan dengan create standar
+        return super().create(request, *args, **kwargs)
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def low_stock_view(request):
     """Dedicated view for low stock items"""
-    low_stock_items = Inventory.objects.filter(current_stock__lte=F('minimum_stock'))
-    serializer = InventorySerializer(low_stock_items, many=True)
-    return Response(serializer.data)
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def inventory_low_stock(request):
-    threshold_type = request.query_params.get('type', 'low')
-    
-    if threshold_type == 'critical':
-        # Logic untuk critical stock (sangat rendah)
-        items = Inventory.objects.filter(current_stock__lte=F('minimum_stock') * 0.5)
-    else:
-        # Logic untuk low stock (rendah)
-        items = Inventory.objects.filter(current_stock__lte=F('minimum_stock'))
-        
-    serializer = InventorySerializer(items, many=True)
-    return Response(serializer.data)
-
-# views.py pada backend
-@api_view(['GET', 'POST', 'PUT'])
-def inventory_detail(request, pk=None):
     """
     Handle inventory detail requests with special processing for assets
     """
@@ -3309,3 +3310,103 @@ class AssetViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         # Tambahkan logika khusus saat membuat aset baru
         serializer.save(created_by=self.request.user)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def debug_asset_create(request):
+    """
+    Debug endpoint for asset creation, bypassing normal flow
+    with simplified processing
+    """
+    try:
+        # Simplified asset creation process
+        data = request.data.copy()
+        
+        # Log data yang diterima untuk debugging
+        print(f"Received data: {data}")
+        
+        # Pastikan fields yang dibutuhkan tersedia
+        required_fields = ['name', 'category']
+        for field in required_fields:
+            if field not in data:
+                return Response({
+                    'success': False,
+                    'error': f"Field '{field}' wajib diisi"
+                }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # PERBAIKAN: Jangan coba map asset_type ke asset_category
+        # Simpan asset_type sebagai bagian dari notes jika perlu
+        if 'asset_type' in data:
+            notes = data.get('notes', '')
+            data['notes'] = f"[{data['asset_type']}] {notes}"
+            del data['asset_type']  # Hapus field yang tidak ada di model
+        
+        # Generate SKU for the asset if not provided
+        if not data.get('sku'):
+            import time
+            data['sku'] = f"ASSET-{int(time.time())}"
+        
+        # Set required fields with defaults if missing
+        data['category'] = 'asset'  # Memastikan kategori selalu asset
+        data['current_stock'] = data.get('current_stock', 1)
+        data['unit'] = data.get('unit', 'unit')
+        
+        # Hapus field yang tidak ada di model Inventory
+        # Dapatkan daftar field yang valid dari model
+        from django.db import models
+        valid_fields = [f.name for f in Inventory._meta.get_fields() 
+                       if not isinstance(f, models.ManyToManyField)]
+        
+        # Hapus field yang tidak valid
+        invalid_fields = []
+        for field in list(data.keys()):
+            if field not in valid_fields:
+                invalid_fields.append(field)
+                del data[field]
+        
+        if invalid_fields:
+            print(f"Removed invalid fields: {invalid_fields}")
+        
+        # Create the asset
+        inventory = Inventory.objects.create(**data)
+        
+        return Response({
+            'success': True,
+            'id': inventory.id,
+            'message': f"Asset '{inventory.name}' created successfully"
+        })
+    except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        
+        print(f"Error in debug_asset_create: {str(e)}")
+        print(error_details)
+        
+        return Response({
+            'success': False,
+            'error': str(e),
+            'details': error_details
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# Tambahkan fungsi inventory_low_stock di file views.py
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def inventory_low_stock(request):
+    """
+    Endpoint khusus untuk mendapatkan daftar inventori dengan stok rendah
+    Ini adalah alternatif untuk endpoint @action low_stock di InventoryViewSet
+    """
+    try:
+        # Filter inventory dengan current_stock di bawah minimum_stock
+        low_stock_items = Inventory.objects.filter(
+            current_stock__lt=F('minimum_stock')
+        ).order_by('name')
+        
+        serializer = InventorySerializer(low_stock_items, many=True)
+        return Response(serializer.data)
+    except Exception as e:
+        logger.error(f"Error in inventory_low_stock: {str(e)}")
+        return Response(
+            {"detail": "Terjadi kesalahan saat mengambil data stok rendah"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

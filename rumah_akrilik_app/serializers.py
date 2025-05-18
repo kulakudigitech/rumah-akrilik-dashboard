@@ -404,23 +404,37 @@ class InventorySerializer(serializers.ModelSerializer):
     def validate(self, data):
         # Normalisasi kategori
         if 'category' in data and data['category'] == 'asset':
+            # Pastikan SKU selalu ada
+            if 'sku' not in data or not data['sku']:
+                # Generate SKU otomatis untuk aset
+                unique_id = timezone.now().strftime('%y%m%d%H%M%S')
+                name_part = data.get('name', '').strip()[:3].upper()
+                if not name_part:
+                    name_part = 'AST'
+                data['sku'] = f"ASSET-{name_part}{unique_id}"
+            
+            # Pastikan asset_type selalu ada
             if 'asset_type' not in data or not data['asset_type']:
                 if 'name' in data and any(keyword in data['name'].lower() for 
-                                          keyword in ['mobil', 'kendaraan', 'gedung', 'tanah']):
+                                           keyword in ['mobil', 'kendaraan', 'gedung', 'tanah']):
                     data['asset_type'] = 'Kendaraan' if any(k in data['name'].lower() 
-                                                           for k in ['mobil', 'kendaraan']) else 'Bangunan'
+                                                            for k in ['mobil', 'kendaraan']) else 'Bangunan'
                 else:
                     data['asset_type'] = 'Lainnya'
+                        
+            # Pastikan acquisition_value dan current_value selalu ada dengan nilai default
+            if 'price' in data:
+                if 'acquisition_value' not in data or data['acquisition_value'] is None:
+                    data['acquisition_value'] = data['price']
                     
-        # Pastikan acquisition_value dan current_value selalu ada dengan nilai default
-        if 'price' in data:
-            if 'current_value' not in data or data['current_value'] is None:
-                data['current_value'] = data['price']
-                
-        # Jika both missing, set to zero
-        if ('acquisition_value' not in data or data['acquisition_value'] is None):
-            data['acquisition_value'] = data.get('price', 0)
+                if 'current_value' not in data or data['current_value'] is None:
+                    data['current_value'] = data['price']
             
+            # Nilai default untuk stock/unit/dll untuk aset
+            data['current_stock'] = data.get('current_stock', 1)
+            data['minimum_stock'] = data.get('minimum_stock', 0)
+            data['unit'] = data.get('unit', 'unit')
+                
         return data
 
 class InventoryTransactionSerializer(serializers.ModelSerializer):
